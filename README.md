@@ -1,6 +1,7 @@
 # Bugslide
 
-Minimalistic issue tracker compatible with Sentry protocol.
+Simple error tracker that can be used with Sentry-compatible SDKs.
+It is designed to be self-hosted and easy to use.
 
 ## Setup client (browser)
 
