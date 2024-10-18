@@ -97,6 +97,10 @@ const { data: errorEvent } = await useFetch(
   () => `/api/${projectId.value}/errors/${errorId.value}/events/${errorEventId.value}`,
 );
 
+useSeoMeta({
+  title: () => error.value?.title ?? `Error: ${errorId.value}`,
+});
+
 const subPages = [
   {
     label: 'Stacktrace',

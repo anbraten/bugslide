@@ -1,6 +1,6 @@
 <template>
   <UCard>
-    <div class="rounded-md border dark:border-gray-700">
+    <div class="rounded-md border dark:border-gray-800">
       <table class="w-full">
         <thead>
           <tr class="bg-gray-100 dark:bg-gray-800">
