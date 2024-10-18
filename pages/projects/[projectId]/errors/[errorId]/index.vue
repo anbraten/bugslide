@@ -1,5 +1,12 @@
 <template>
-  <div>
+  <div class="flex flex-col">
+    <div class="ml-auto mb-2 flex items-center gap-2">
+      <span class="text-sm text-gray-600 dark:text-gray-400">{{
+        showOnlyRelevantFrames ? 'Most relevant frames' : 'All frames'
+      }}</span>
+      <UToggle v-model="showOnlyRelevantFrames" />
+    </div>
+
     <div class="border dark:border-gray-800 rounded-md">
       <div v-for="(frame, i) in frames.toReversed()" :key="i">
         <div class="flex gap-1 p-1 bg-gray-100 dark:bg-gray-800 border-t first:border-0 text-sm items-center">
@@ -65,7 +72,7 @@ function sanitizeStacktracePath(path: string) {
   );
 }
 
-const showOnlyRelevantFrames = ref(false);
+const showOnlyRelevantFrames = ref(true);
 const frames = computed(() => {
   const _frames = props.errorEvent.stacktrace?.frames ?? [];
 
