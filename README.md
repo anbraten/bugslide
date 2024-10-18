@@ -1,75 +1,56 @@
-# Nuxt 3 Minimal Starter
+# Bugslide
 
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Minimalistic issue tracker compatible with Sentry protocol.
 
-## Setup
+## Setup client (browser)
 
-Make sure to install the dependencies:
-
-```bash
-# npm
-npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
+1. Install dependencies:
 
 ```bash
-# npm
-npm run dev
-
-# pnpm
-pnpm run dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
+$ npm install --save @sentry/browser
 ```
 
-## Production
+2. Setup Sentry client:
 
-Build the application for production:
+```javascript
+import * as Sentry from '@sentry/browser';
 
-```bash
-# npm
-npm run build
+Sentry.init({
+  dsn: 'http://can-be-ignored@localhost:3000/<project-id>',
+  environment: 'development',
+  release: 'commit:abcdefg12345',
+  integrations: [
+    Sentry.replayIntegration(),
+    Sentry.captureConsoleIntegration({
+      levels: ['error'],
+    }),
+  ],
 
-# pnpm
-pnpm run build
+  logErrors: true,
+});
 
-# yarn
-yarn build
-
-# bun
-bun run build
+Sentry.captureMessage('Hello, world!');
 ```
 
-Locally preview production build:
+## TODO
 
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm run preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+- [ ] Fix events counter race-condition when inserting multiple events at once
+- [ ] Add support for multiple projects
+  - [ ] Add new project
+  - [ ] Delete project
+- [ ] Add authentication
+  - [ ] Login
+  - [ ] Logout
+  - [ ] Register
+  - [ ] Assign user to project
+  - [ ] Only return projects that user is assigned to
+- [ ] Source maps
+  - [ ] Upload source maps
+  - [ ] Show stack trace with source maps
+- [ ] Allow to resolve issues
+  - [ ] Add button to resolve / unresolve issue
+  - [ ] Show resolved issues in a separate tab
+- [ ] Link releases to forge
+- [ ] Allow filtering by
+  - [ ] Environment
+- [ ] Alert when new issue is created
