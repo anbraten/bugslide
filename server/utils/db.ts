@@ -62,12 +62,6 @@ export const errorEventsTable = sqliteTable('error_events', {
   event: text({ mode: 'json' }).$type<Event>(),
 });
 
-// { type: 'ClientResponseError 0',
-//   value:
-//    'The request was autocancelled. You can find more info in https://github.com/pocketbase/js-sdk#auto-cancellation.',
-//   stacktrace: { frames: [ [Object], [Object], [Object], [Object] ] },
-//   mechanism: { type: 'console', handled: false } }
-
 export const logsTable = sqliteTable('logs', {
   id: int().primaryKey({ autoIncrement: true }),
   projectId: int()
