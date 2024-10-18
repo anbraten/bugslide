@@ -9,9 +9,10 @@
         <div
           class="-ml-8 bg-white dark:bg-gray-900 w-8 h-8 rounded-full flex items-center justify-center"
           :class="{
-            'text-red-700': breadcrumb.level === 'error',
-            'text-green-700': breadcrumb.type === 'http' || breadcrumb.type === undefined,
-            'text-blue-700': breadcrumb.type === 'ui',
+            'text-red-700': getColor(breadcrumb) === 'red',
+            'text-green-700': getColor(breadcrumb) === 'green',
+            'text-blue-700': getColor(breadcrumb) === 'blue',
+            'text-gray-500': getColor(breadcrumb) === 'gray',
           }"
         >
           <UIcon v-if="breadcrumb.category === 'sentry.event'" name="i-lucide-flame" />
@@ -24,9 +25,10 @@
         <span
           class="font-bold"
           :class="{
-            'text-red-700': breadcrumb.level === 'error',
-            'text-green-700': breadcrumb.type === 'http' || breadcrumb.type === undefined,
-            'text-blue-700': breadcrumb.type === 'ui',
+            'text-red-700': getColor(breadcrumb) === 'red',
+            'text-green-700': getColor(breadcrumb) === 'green',
+            'text-blue-700': getColor(breadcrumb) === 'blue',
+            'text-gray-500': getColor(breadcrumb) === 'gray',
           }"
           >{{ getCategory(breadcrumb) }}</span
         >
@@ -57,10 +59,26 @@ defineProps<{
   errorEvent: { event: Event };
 }>();
 
+function getColor(breadcrumb: Breadcrumb): 'red' | 'blue' | 'green' | 'gray' {
+  if (breadcrumb.category === 'console') {
+    return 'gray';
+  }
+
+  if (breadcrumb.level === 'error' || breadcrumb.level === 'fatal') {
+    return 'red';
+  }
+
+  if (breadcrumb.category === 'ui.click') {
+    return 'blue';
+  }
+
+  return 'green';
+}
+
 function getCategory(breadcrumb: Breadcrumb) {
   switch (breadcrumb.category) {
     case 'sentry.event':
-      return 'Exception';
+      return 'Sentry Event';
     case 'fetch':
       return 'Fetch';
     case 'ui.click':
