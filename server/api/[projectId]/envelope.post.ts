@@ -99,6 +99,10 @@ async function saveError(project: any, exception: Exception, event: Event) {
       ),
   );
 
+  if (error?.state === 'ignored') {
+    return;
+  }
+
   if (error) {
     // update error
     await db
@@ -123,7 +127,6 @@ async function saveError(project: any, exception: Exception, event: Event) {
         state: 'open',
         events: 1,
         lastOccurrence: new Date(),
-        // stacktrace: exception.stacktrace ? JSON.stringify(exception.stacktrace) : null,
       })
       .returning();
 

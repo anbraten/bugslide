@@ -46,7 +46,7 @@ export const errorsTable = sqliteTable('errors', {
   updatedAt: int({ mode: 'timestamp' }).notNull(),
   title: text().notNull(),
   value: text(),
-  state: text().notNull().$type<'open' | 'closed'>(),
+  state: text().notNull().$type<'open' | 'closed' | 'ignored'>(),
   events: int().notNull(),
   lastOccurrence: int({ mode: 'timestamp' }).notNull(),
 });
