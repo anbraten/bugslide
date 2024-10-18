@@ -3,11 +3,11 @@
     <div
       v-for="breadcrumb in errorEvent.event.breadcrumbs"
       :key="breadcrumb.timestamp"
-      class="flex flex-col border-l p-4 gap-4"
+      class="flex flex-col border-l dark:border-gray-800 p-4 gap-4"
     >
       <div class="flex w-full gap-2 items-center">
         <div
-          class="-ml-8 bg-white w-8 h-8 rounded-full flex items-center justify-center"
+          class="-ml-8 bg-white dark:bg-gray-900 w-8 h-8 rounded-full flex items-center justify-center"
           :class="{
             'text-red-700': breadcrumb.level === 'error',
             'text-green-700': breadcrumb.type === 'http' || breadcrumb.type === undefined,
@@ -42,7 +42,9 @@
         <span v-if="breadcrumb.timestamp">{{ new Date(breadcrumb.timestamp).toLocaleString() }}</span>
       </div>
       <span>{{ breadcrumb.message }}</span>
-      <pre v-if="breadcrumb.data" class="p-2 bg-gray-200 rounded-md whitespace-pre-wrap">{{ breadcrumb.data }}</pre>
+      <pre v-if="breadcrumb.data" class="p-2 bg-gray-200 dark:bg-gray-800 rounded-md whitespace-pre-wrap">{{
+        breadcrumb.data
+      }}</pre>
     </div>
   </div>
 </template>

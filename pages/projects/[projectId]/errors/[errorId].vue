@@ -121,10 +121,10 @@ const subPages = [
 
 <style scoped>
 table.striped tr:nth-child(odd) {
-  @apply bg-gray-100;
+  @apply bg-gray-100 dark:bg-gray-800;
 }
 
 table th {
-  @apply font-normal;
+  @apply font-normal px-2;
 }
 </style>

@@ -1,8 +1,8 @@
 <template>
   <div>
-    <div class="border rounded-md">
+    <div class="border dark:border-gray-800 rounded-md">
       <div v-for="frame in errorEvent?.stacktrace?.frames ?? []">
-        <div class="flex gap-1 p-1 bg-gray-100 border-t first:border-0 text-sm items-center">
+        <div class="flex gap-1 p-1 bg-gray-100 dark:bg-gray-800 border-t first:border-0 text-sm items-center">
           <span class="font-bold" :title="frame.filename">{{ frame.filename?.split('/').pop() }}</span>
           <span>in</span>
           <span class="font-bold">{{ frame.function }}</span>
