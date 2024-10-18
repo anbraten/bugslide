@@ -104,6 +104,7 @@ async function saveError(project: any, exception: Exception, event: Event) {
     await db
       .update(errorsTable)
       .set({
+        state: 'open', // reopen error in case it was closed
         events: error.events + 1,
         updatedAt: new Date(),
         lastOccurrence: new Date(),
