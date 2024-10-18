@@ -17,10 +17,12 @@
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.35.1",
     "nuxt": "^3.13.0",
+    "ua-parser-js": "^1.0.39",
     "vue": "latest",
     "vue-router": "latest"
   },
   "devDependencies": {
+    "@types/ua-parser-js": "^0.7.39",
     "drizzle-kit": "^0.26.2",
     "tsx": "^4.19.1"
   }

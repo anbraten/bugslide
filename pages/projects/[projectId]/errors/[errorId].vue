@@ -8,10 +8,8 @@
           <span class="font-bold text-xl">{{ error.title }} </span>
 
           <UBadge variant="subtle" :ui="{ rounded: 'rounded-full' }" color="orange" size="sm">New</UBadge>
-        </div>
 
-        <div class="flex gap-4 justify-around my-8 max-w-2xl w-full mx-auto">
-          <div class="flex flex-col items-center">
+          <div class="flex flex-col items-center ml-auto">
             <span class="text-sm text-gray-600 dark:text-gray-400">Events</span>
             <span class="text-xl">{{ error.events }}</span>
           </div>
@@ -32,10 +30,14 @@
         }}</pre>
 
         <div v-if="errorEvent?.event" class="flex flex-col items-start mb-4">
-          <span class="mb-2 font-bold">Event metadata</span>
+          <span class="mb-2 font-bold">Event metadata ({{ errorEvent.event.event_id?.slice(0, 8) }})</span>
 
           <table class="striped">
             <tbody class="text-left">
+              <tr>
+                <th>Reported at</th>
+                <td>{{ errorEvent?.createdAt }}</td>
+              </tr>
               <tr>
                 <th>Level</th>
                 <td>{{ errorEvent?.event.level }}</td>
@@ -56,9 +58,21 @@
                 <th>Transaction</th>
                 <td>{{ errorEvent?.event.transaction }}</td>
               </tr>
-              <tr>
-                <th>Reported at</th>
-                <td>{{ errorEvent?.createdAt }}</td>
+              <tr v-if="errorEvent?.event.request?.url">
+                <th>Url</th>
+                <td>
+                  <router-link :to="errorEvent?.event.request?.url" class="text-blue-500">{{
+                    errorEvent?.event.request?.url
+                  }}</router-link>
+                </td>
+              </tr>
+              <tr v-if="userAgent">
+                <th>Browser</th>
+                <td>{{ userAgent?.browser.name }} {{ userAgent?.browser.version }}</td>
+              </tr>
+              <tr v-if="userAgent">
+                <th>OS</th>
+                <td>{{ userAgent?.os.name }}</td>
               </tr>
             </tbody>
           </table>
@@ -92,6 +106,8 @@
 </template>
 
 <script lang="ts" setup>
+import { UAParser } from 'ua-parser-js';
+
 const route = useRoute();
 
 const projectId = computed(() => route.params.projectId as string);
@@ -127,6 +143,19 @@ const subPages = [
     exact: true,
   },
 ];
+
+const userAgent = computed(() => {
+  const headers = errorEvent.value?.event?.request?.headers;
+  if (!headers) {
+    return undefined;
+  }
+
+  const ua = new UAParser(headers['User-Agent']);
+  return {
+    browser: ua.getBrowser(),
+    os: ua.getOS(),
+  };
+});
 </script>
 
 <style scoped>
@@ -134,7 +163,8 @@ table.striped tr:nth-child(odd) {
   @apply bg-gray-100 dark:bg-gray-800;
 }
 
-table th {
+table th,
+table td {
   @apply font-normal px-2 py-1;
 }
 </style>

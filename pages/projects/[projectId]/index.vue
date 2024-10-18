@@ -10,7 +10,6 @@
               </div>
             </th>
             <th></th>
-            <th>Graph</th>
             <th>Events</th>
           </tr>
         </thead>
@@ -30,13 +29,13 @@
                 </router-link>
 
                 <div class="flex gap-4 mt-2">
-                  <UBadge variant="subtle" :ui="{ rounded: 'rounded-full' }" color="orange" size="sm">New</UBadge>
-                  <span>Frontend</span>
+                  <UBadge variant="subtle" :ui="{ rounded: 'rounded-full' }" color="orange" size="sm">{{
+                    error.state
+                  }}</UBadge>
                   <span>{{ timeAgo(error.lastOccurrence) }} ago | {{ timeAgo(error.createdAt) }} old</span>
                 </div>
               </div>
             </td>
-            <td>graph</td>
             <td class="text-center">
               <span>{{ error.events }}</span>
             </td>
