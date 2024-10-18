@@ -8,26 +8,32 @@
           <span class="font-bold text-xl">{{ error.title }} </span>
 
           <UBadge variant="subtle" :ui="{ rounded: 'rounded-full' }" color="orange" size="sm">New</UBadge>
+        </div>
 
-          <div class="flex flex-col items-center ml-auto">
-            <span class="text-sm text-gray-600">Events</span>
+        <div class="flex gap-4 justify-around my-8 max-w-2xl w-full mx-auto">
+          <div class="flex flex-col items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Events</span>
             <span class="text-xl">{{ error.events }}</span>
           </div>
+
           <div class="flex flex-col items-center">
-            <span class="text-sm text-gray-600">First Seen</span>
-            <span class="text-xl">{{ timeAgo(error.createdAt) }}</span>
-          </div>
-          <div class="flex flex-col items-center">
-            <span class="text-sm text-gray-600">Last Seen</span>
+            <span class="text-sm text-gray-600 dark:text-gray-400">Last Seen</span>
             <span class="text-xl">{{ timeAgo(error.lastOccurrence) }}</span>
           </div>
+
+          <div class="flex flex-col items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">First Seen</span>
+            <span class="text-xl">{{ timeAgo(error.createdAt) }}</span>
+          </div>
         </div>
 
-        <div class="flex gap-2 items-start mt-2 mb-4">
-          <span>{{ error.value }}</span>
-        </div>
+        <pre class="p-2 bg-gray-200 dark:bg-gray-800 rounded-md whitespace-pre-wrap w-full mt-2 mb-4">{{
+          error.value
+        }}</pre>
 
-        <div v-if="errorEvent?.event" class="flex items-start mb-4">
+        <div v-if="errorEvent?.event" class="flex flex-col items-start mb-4">
+          <span class="mb-2 font-bold">Event metadata</span>
+
           <table class="striped">
             <tbody class="text-left">
               <tr>
@@ -129,6 +135,6 @@ table.striped tr:nth-child(odd) {
 }
 
 table th {
-  @apply font-normal px-2;
+  @apply font-normal px-2 py-1;
 }
 </style>
