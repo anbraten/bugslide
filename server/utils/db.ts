@@ -1,7 +1,7 @@
 import { int, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
-import { Stacktrace } from '@sentry/types';
+import { Event, Stacktrace } from '@sentry/types';
 
 let db: ReturnType<typeof drizzle> | null = null;
 
@@ -59,7 +59,7 @@ export const errorEventsTable = sqliteTable('error_events', {
     .notNull(),
   createdAt: int({ mode: 'timestamp' }).notNull(),
   stacktrace: text({ mode: 'json' }).$type<Stacktrace>(),
-  event: text({ mode: 'json' }),
+  event: text({ mode: 'json' }).$type<Event>(),
 });
 
 // { type: 'ClientResponseError 0',

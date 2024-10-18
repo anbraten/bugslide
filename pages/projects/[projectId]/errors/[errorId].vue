@@ -5,7 +5,7 @@
     <UCard v-if="error">
       <div class="flex flex-col p-2">
         <div class="flex gap-4 mt-2 items-center">
-          <span class="font-bold text-xl">{{ error.title }}</span>
+          <span class="font-bold text-xl">{{ error.title }} </span>
 
           <UBadge variant="subtle" :ui="{ rounded: 'rounded-full' }" color="orange" size="sm">New</UBadge>
 
@@ -25,12 +25,9 @@
 
         <div class="flex gap-2 items-start mt-2 mb-4">
           <span>{{ error.value }}</span>
-
-          <UButton icon="i-mdi-chevron-left" color="gray" size="sm" class="ml-auto" />
-          <UButton icon="i-mdi-chevron-right" color="gray" size="sm" />
         </div>
 
-        <div class="flex items-start mb-4">
+        <div v-if="errorEvent?.event" class="flex items-start mb-4">
           <table class="striped">
             <tbody class="text-left">
               <tr>
@@ -53,11 +50,34 @@
                 <th>Transaction</th>
                 <td>{{ errorEvent?.event.transaction }}</td>
               </tr>
+              <tr>
+                <th>Reported at</th>
+                <td>{{ errorEvent?.createdAt }}</td>
+              </tr>
             </tbody>
           </table>
         </div>
 
-        <UHorizontalNavigation :links="subPages" class="border-b border-gray-200 dark:border-gray-800 mb-2" />
+        <div class="flex border-b border-gray-200 dark:border-gray-800 mb-2 items-center gap-2">
+          <UHorizontalNavigation :links="subPages" />
+
+          <span class="ml-auto">[{{ errorEventId }}]</span>
+
+          <UButton
+            icon="i-mdi-chevron-left"
+            color="gray"
+            size="sm"
+            :disabled="errorEventId === 1"
+            @click="errorEventId = errorEventId - 1"
+          />
+          <UButton
+            icon="i-mdi-chevron-right"
+            color="gray"
+            size="sm"
+            :disabled="errorEventId === error.events"
+            @click="errorEventId = errorEventId + 1"
+          />
+        </div>
 
         <NuxtPage :error :errorEvent />
       </div>
@@ -72,7 +92,7 @@ const projectId = computed(() => route.params.projectId as string);
 const errorId = computed(() => route.params.errorId as string);
 const { data: error } = await useFetch(() => `/api/${projectId.value}/errors/${errorId.value}`);
 
-const errorEventId = ref<number>(1);
+const errorEventId = ref(1);
 const { data: errorEvent } = await useFetch(
   () => `/api/${projectId.value}/errors/${errorId.value}/events/${errorEventId.value}`,
 );

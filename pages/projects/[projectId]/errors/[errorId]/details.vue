@@ -5,8 +5,10 @@
 </template>
 
 <script lang="ts" setup>
+import type { Breadcrumb, Event, Exception } from '@sentry/types';
+
 defineProps<{
-  error: any;
-  errorEvent: any;
+  error: Exception;
+  errorEvent: { event: Event };
 }>();
 </script>

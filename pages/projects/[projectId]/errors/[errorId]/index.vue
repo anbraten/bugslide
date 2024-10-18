@@ -30,8 +30,10 @@
 </template>
 
 <script lang="ts" setup>
+import type { Event, Exception, Stacktrace } from '@sentry/types';
+
 defineProps<{
-  error: any;
-  errorEvent: any;
+  error: Exception;
+  errorEvent: { event: Event; stacktrace: Stacktrace };
 }>();
 </script>
