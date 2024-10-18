@@ -42,7 +42,7 @@
                 <td>{{ errorEvent?.event.platform }}</td>
               </tr>
               <tr>
-                <th>Environment</th>
+                <th class="pr-4">Environment</th>
                 <td>{{ errorEvent?.event.environment }}</td>
               </tr>
               <tr>
