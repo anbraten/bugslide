@@ -2,6 +2,7 @@ import { int, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
 import { Event, Stacktrace } from '@sentry/types';
+import { InferSelectModel } from 'drizzle-orm';
 
 let db: ReturnType<typeof drizzle> | null = null;
 
@@ -10,9 +11,10 @@ export function useDb() {
     return db;
   }
 
+  const config = useRuntimeConfig();
   const client = createClient({
-    url: process.env.TURSO_DATABASE_URL!,
-    authToken: process.env.TURSO_AUTH_TOKEN!,
+    url: config.db.tursoDatabaseUrl,
+    authToken: config.db.tursoAuthToken,
   });
   db = drizzle(client);
   return db;
@@ -28,13 +30,22 @@ export const projectsTable = sqliteTable('projects', {
   name: text(),
 });
 
-export const sessionsTable = sqliteTable('sessions', {
+export const usersTable = sqliteTable('users', {
+  id: int('id').primaryKey(),
+  name: text('name'),
+  avatarUrl: text('avatarUrl'),
+  email: text('email').unique(),
+});
+export type User = InferSelectModel<typeof usersTable>;
+
+export const userProjectsTable = sqliteTable('user_projects', {
   id: int().primaryKey({ autoIncrement: true }),
+  userId: int()
+    .references(() => usersTable.id)
+    .notNull(),
   projectId: int()
     .references(() => projectsTable.id)
     .notNull(),
-  session: text(),
-  createdAt: text(),
 });
 
 export const errorsTable = sqliteTable('errors', {

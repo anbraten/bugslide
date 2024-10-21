@@ -40,9 +40,8 @@ Sentry.captureMessage('Hello, world!');
   - [ ] Add new project
   - [ ] Delete project
 - [ ] Add authentication
-  - [ ] Login
-  - [ ] Logout
-  - [ ] Register
+  - [x] Login / Register
+  - [x] Logout
   - [ ] Assign user to project
   - [ ] Only return projects that user is assigned to
 - [ ] Source maps
@@ -50,8 +49,21 @@ Sentry.captureMessage('Hello, world!');
   - [ ] Show stack trace with source maps
 - [ ] Allow to resolve issues
   - [ ] Add button to resolve / unresolve issue
-  - [ ] Show resolved issues in a separate tab
-- [ ] Link releases to forge
+- [ ] Allow to delete issues
+- [ ] Releases
+  - [ ] Automatically create release when first event is received
+  - [ ] Link to open release in forge
+  - [ ] Upload source maps
+- [ ] Environment
+  - [ ] Automatically create environment when first event is received
 - [ ] Allow filtering by
   - [ ] Environment
+  - [ ] Release
+  - [ ] Status (resolved / unresolved / ignored)
+- [ ] rate limiting & quotas
+  - [ ] event submission x / minute
+  - [ ] delete resolved issues after x days
+  - [ ] delete error event data after x days
+  - [ ] delete oldest event if limit x is reached
 - [ ] Alert when new issue is created
+- [ ] Add release to first seen / last seen

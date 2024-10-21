@@ -8,6 +8,20 @@
       "when": 1729252642498,
       "tag": "0000_magical_sunspot",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1729505186037,
+      "tag": "0001_pink_landau",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1729506026449,
+      "tag": "0002_breezy_tarot",
+      "breakpoints": true
     }
   ]
 }
