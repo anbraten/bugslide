@@ -10,7 +10,7 @@ export async function useAuth() {
   async function logout() {
     await $fetch('/api/auth/logout', { method: 'POST' });
     await updateSession();
-    navigateTo('/auth/login');
+    await navigateTo('/auth/login');
   }
 
   return {

@@ -83,8 +83,6 @@ function getCategory(breadcrumb: Breadcrumb) {
       return 'Fetch';
     case 'ui.click':
       return 'UI Click';
-    case 'sentry.event':
-      return 'Sentry';
     case 'console':
       return 'Console';
     case 'navigation':
