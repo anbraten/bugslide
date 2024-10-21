@@ -10,7 +10,8 @@
     "postinstall": "nuxt prepare",
     "db:push": "bun drizzle-kit push",
     "db:generate": "bun drizzle-kit generate",
-    "db:up": "bun drizzle-kit up"
+    "db:up": "bun drizzle-kit up",
+    "db:ui": "bun drizzle-kit studio"
   },
   "dependencies": {
     "@libsql/client": "^0.14.0",

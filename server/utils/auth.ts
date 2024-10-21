@@ -32,13 +32,22 @@ export async function requireUser(event: H3Event): Promise<User> {
   return user;
 }
 
-export async function requireAccessToProject(user: User, projectId: number) {
+export async function requireProject(event: H3Event, projectId: number | string | undefined) {
   const db = await useDb();
+  const user = await requireUser(event);
+
+  const projectIdNumber = Number(projectId);
+  if (isNaN(projectIdNumber)) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'projectId is required',
+    });
+  }
 
   const userRepo = await db
     .select()
     .from(userProjectsTable)
-    .where(and(eq(userProjectsTable.userId, user.id), eq(userProjectsTable.projectId, projectId)))
+    .where(and(eq(userProjectsTable.userId, user.id), eq(userProjectsTable.projectId, projectIdNumber)))
     .get();
 
   if (!userRepo) {
@@ -48,18 +57,18 @@ export async function requireAccessToProject(user: User, projectId: number) {
     });
   }
 
-  const repo = await db
+  const project = await db
     .select()
     .from(projectsTable)
     .where(eq(projectsTable.id, Number(projectId)))
     .get();
 
-  if (!repo) {
+  if (!project) {
     throw createError({
       statusCode: 404,
       message: 'Project not found',
     });
   }
 
-  return repo;
+  return project;
 }

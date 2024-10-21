@@ -1,19 +1,28 @@
 import { and, eq } from 'drizzle-orm';
 
 export default defineEventHandler(async (event) => {
-  const projectId = getRouterParam(event, 'projectId');
-  if (!projectId) {
-    throw createError({
-      message: 'projectId is required',
-      status: 400,
-    });
-  }
+  const db = await useDb();
+
+  const project = await requireProject(event, getRouterParam(event, 'projectId'));
 
   const errorId = getRouterParam(event, 'errorId');
   if (!errorId) {
     throw createError({
       message: 'errorId is required',
       status: 400,
+    });
+  }
+
+  const error = await getFirstElement(
+    db
+      .select()
+      .from(errorsTable)
+      .where(and(eq(errorsTable.projectId, project.id), eq(errorsTable.id, parseInt(errorId, 10)))),
+  );
+  if (!error) {
+    throw createError({
+      message: 'Error not found',
+      status: 404,
     });
   }
 
@@ -25,27 +34,11 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const db = await useDb();
-  const project = await getFirstElement(
-    db
-      .select()
-      .from(projectsTable)
-      .where(eq(projectsTable.id, parseInt(projectId, 10))),
-  );
-  if (!project) {
-    throw createError({
-      message: 'Project not found',
-      status: 404,
-    });
-  }
-
   const errorEvent = await getFirstElement(
     db
       .select()
       .from(errorEventsTable)
-      .where(
-        and(eq(errorEventsTable.error, parseInt(errorId, 10)), eq(errorEventsTable.eventId, parseInt(eventId, 10))),
-      ),
+      .where(and(eq(errorEventsTable.error, error.id), eq(errorEventsTable.eventId, parseInt(eventId, 10)))),
   );
 
   return errorEvent;
