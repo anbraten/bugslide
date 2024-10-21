@@ -6,7 +6,7 @@ export type AuthSession = {
 };
 
 export async function useAuthSession(event: H3Event) {
-  const sessionConfig = useRuntimeConfig().auth || {};
+  const sessionConfig = useRuntimeConfig(event).auth || {};
   return await useSession<AuthSession>(event, sessionConfig);
 }
 
@@ -16,7 +16,7 @@ export async function getUser(event: H3Event): Promise<User | undefined> {
     return undefined;
   }
 
-  const db = await useDb();
+  const db = await useDb(event);
   return await db.select().from(usersTable).where(eq(usersTable.id, session.data.userId)).get();
 }
 
@@ -33,7 +33,7 @@ export async function requireUser(event: H3Event): Promise<User> {
 }
 
 export async function requireProject(event: H3Event, projectId: number | string | undefined) {
-  const db = await useDb();
+  const db = await useDb(event);
   const user = await requireUser(event);
 
   const projectIdNumber = Number(projectId);

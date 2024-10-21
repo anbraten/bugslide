@@ -1,7 +1,7 @@
 import { and, eq } from 'drizzle-orm';
 
 export default defineEventHandler(async (event) => {
-  const db = await useDb();
+  const db = await useDb(event);
 
   const project = await requireProject(event, getRouterParam(event, 'projectId'));
 

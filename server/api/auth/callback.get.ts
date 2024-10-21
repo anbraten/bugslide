@@ -1,6 +1,6 @@
 export default defineEventHandler(async (event) => {
-  const db = await useDb();
-  const config = useRuntimeConfig();
+  const db = await useDb(event);
+  const config = useRuntimeConfig(event);
   const session = await useAuthSession(event);
 
   const { state, code } = getQuery(event);
@@ -61,7 +61,6 @@ export default defineEventHandler(async (event) => {
       },
     });
     const primaryEmail = emails.find((email: any) => email.primary);
-    // Still no email
     email = primaryEmail?.email ?? null;
   }
 

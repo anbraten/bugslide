@@ -3,15 +3,16 @@ import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
 import { Event, Stacktrace } from '@sentry/types';
 import { InferSelectModel } from 'drizzle-orm';
+import type { H3Event } from 'h3';
 
 let db: ReturnType<typeof drizzle> | null = null;
 
-export function useDb() {
+export function useDb(event: H3Event) {
   if (db) {
     return db;
   }
 
-  const config = useRuntimeConfig();
+  const config = useRuntimeConfig(event);
   const client = createClient({
     url: config.db.tursoDatabaseUrl,
     authToken: config.db.tursoAuthToken,
@@ -61,6 +62,7 @@ export const errorsTable = sqliteTable('errors', {
   events: int().notNull(),
   lastOccurrence: int({ mode: 'timestamp' }).notNull(),
 });
+export type Error = InferSelectModel<typeof errorsTable>;
 
 export const errorEventsTable = sqliteTable('error_events', {
   id: int().primaryKey({ autoIncrement: true }),

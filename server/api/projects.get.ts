@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm/sql';
 
 export default defineEventHandler(async (event) => {
-  const db = await useDb();
+  const db = await useDb(event);
   const user = await requireUser(event);
 
   const projects = await db

@@ -3,7 +3,7 @@ import { randomBytes } from 'crypto';
 export default defineEventHandler(async (event) => {
   const stateId = randomBytes(64).toString('hex');
 
-  const config = useRuntimeConfig();
+  const config = useRuntimeConfig(event);
 
   const clientId = config.auth.clientId;
   const scopes = ['read:user', 'user:email'];

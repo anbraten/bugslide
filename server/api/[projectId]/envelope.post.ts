@@ -1,6 +1,7 @@
 import { Event, EventItem, Exception } from '@sentry/types';
 import { parseEnvelope, forEachEnvelopeItem } from '@sentry/utils';
 import { and, eq } from 'drizzle-orm';
+import type { H3Event } from 'h3';
 
 export default defineEventHandler(async (event) => {
   setHeader(event, 'Access-Control-Allow-Origin', '*');
@@ -19,7 +20,7 @@ export default defineEventHandler(async (event) => {
   //   sentry_client?: string;
   // }>(event);
 
-  const db = await useDb();
+  const db = await useDb(event);
   const project = await getFirstElement(
     db
       .select()
@@ -37,12 +38,12 @@ export default defineEventHandler(async (event) => {
 
   const envelope = parseEnvelope(sentryEnvelope);
 
-  const events: Event[] = [];
+  const errorEvents: Event[] = [];
   forEachEnvelopeItem(envelope, (item, itemType) => {
     if (itemType === 'event') {
       const event = Array.isArray(item) ? (item as EventItem)[1] : undefined;
       if (event) {
-        events.push(event);
+        errorEvents.push(event);
       } else {
         console.log('Unsupported event item', item);
       }
@@ -51,25 +52,25 @@ export default defineEventHandler(async (event) => {
     }
   });
 
-  for await (const event of events) {
-    if (event.exception) {
-      for await (const exception of event.exception.values ?? []) {
+  for await (const errorEvent of errorEvents) {
+    if (errorEvent.exception) {
+      for await (const exception of errorEvent.exception.values ?? []) {
         try {
-          await saveError(project, exception, event);
+          await saveError(event, project, exception, errorEvent);
         } catch (error) {
           console.error('Failed to store error:', error);
         }
       }
     }
 
-    if (event.logentry) {
+    if (errorEvent.logentry) {
       try {
         await db.insert(logsTable).values({
           projectId: project.id,
           createdAt: new Date(),
-          level: event.level || 'info',
-          message: event.logentry?.message || 'Unknown Log',
-          metadata: event.extra ? JSON.stringify(event.extra) : null,
+          level: errorEvent.level || 'info',
+          message: errorEvent.logentry?.message || 'Unknown Log',
+          metadata: errorEvent.extra ? JSON.stringify(errorEvent.extra) : null,
         });
       } catch (error) {
         console.error('Failed to store log:', error);
@@ -82,8 +83,8 @@ export default defineEventHandler(async (event) => {
   };
 });
 
-async function saveError(project: any, exception: Exception, event: Event) {
-  const db = await useDb();
+async function saveError(event: H3Event, project: any, exception: Exception, errorEvent: Event) {
+  const db = await useDb(event);
 
   // check if error already exists
   let error = await getFirstElement(
@@ -142,6 +143,6 @@ async function saveError(project: any, exception: Exception, event: Event) {
     eventId: error.events,
     createdAt: new Date(),
     stacktrace: exception.stacktrace,
-    event: event,
+    event: errorEvent,
   });
 }

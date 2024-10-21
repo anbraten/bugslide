@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm';
 import { requireProject } from '~/server/utils/auth';
 
 export default defineEventHandler(async (event) => {
-  const db = await useDb();
+  const db = await useDb(event);
 
   const project = await requireProject(event, getRouterParam(event, 'projectId'));
 
