@@ -33,8 +33,7 @@ export default defineEventHandler(async (event) => {
     ignoreResponseError: true,
   });
 
-  console.log(_response.headers, _response.status, _response.statusText);
-  console.log('response', _response._data);
+  console.log(_response.body, _response.headers, _response.status, _response.statusText, await _response.text());
 
   const response = await _response.json();
   console.log('response', response);
