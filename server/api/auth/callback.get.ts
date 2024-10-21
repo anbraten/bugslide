@@ -17,11 +17,11 @@ export default defineEventHandler(async (event) => {
     throw new Error('No code provided');
   }
 
-  console.log('config', config);
-
-  const response = await $fetch<{
-    access_token: string;
-    error: string;
+  const _response = await $fetch.raw<{
+    access_token?: string;
+    error?: string;
+    scope?: string;
+    token_type?: string;
   }>('https://github.com/login/oauth/access_token', {
     method: 'POST',
     body: {
@@ -32,12 +32,16 @@ export default defineEventHandler(async (event) => {
     },
     ignoreResponseError: true,
   });
+
+  console.log(_response.body, _response.headers, _response.status, _response.statusText, await _response.text());
+
+  const response = await _response.json();
+  console.log('response', response);
+
   if (response.error) {
     console.error(response.error);
     throw new Error('Error getting access token');
   }
-
-  console.log('response', response);
 
   const githubUser = await $fetch<{
     avatar_url: string;
@@ -47,7 +51,7 @@ export default defineEventHandler(async (event) => {
     name: string;
   }>('https://api.github.com/user', {
     headers: {
-      Authorization: `token ${response.access_token}`,
+      Authorization: `Bearer ${response.access_token}`,
     },
   });
 
@@ -61,7 +65,7 @@ export default defineEventHandler(async (event) => {
       }[]
     >('https://api.github.com/user/emails', {
       headers: {
-        Authorization: `token ${response.access_token}`,
+        Authorization: `Bearer ${response.access_token}`,
       },
     });
     const primaryEmail = emails.find((email: any) => email.primary);
