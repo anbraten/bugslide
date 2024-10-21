@@ -17,6 +17,8 @@ export default defineEventHandler(async (event) => {
     throw new Error('No code provided');
   }
 
+  console.log('config', config);
+
   const response = await $fetch<{
     access_token: string;
     error: string;
