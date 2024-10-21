@@ -132,6 +132,20 @@ async function saveError(event: H3Event, project: any, exception: Exception, err
       .returning();
 
     error = res?.[0];
+
+    // send error mail to all project members
+    const users = await db
+      .select()
+      .from(usersTable)
+      .leftJoin(userProjectsTable, eq(usersTable.id, userProjectsTable.userId))
+      .where(eq(userProjectsTable.projectId, project.id));
+
+    for await (const user of users) {
+      if (!user.users.email) {
+        continue;
+      }
+      await sendNewErrorMail(event, user.users.email, error);
+    }
   }
 
   if (!error) {

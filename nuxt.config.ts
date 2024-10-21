@@ -4,6 +4,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@nuxt/ui'],
   runtimeConfig: {
+    publicHost: '',
     auth: {
       password: '',
       clientId: '',
@@ -13,9 +14,19 @@ export default defineNuxtConfig({
       tursoDatabaseUrl: '',
       tursoAuthToken: '',
     },
+    mail: {
+      host: '',
+      port: 0,
+      username: '',
+      password: '',
+      secure: false,
+      requireTLS: false,
+      from: '',
+    },
   },
   $development: {
     runtimeConfig: {
+      publicHost: 'http://localhost:3000',
       auth: {
         password: 'a-32-plus-characters-long-password',
       },
