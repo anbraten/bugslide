@@ -37,6 +37,8 @@ export default defineEventHandler(async (event) => {
     throw new Error('Error getting access token');
   }
 
+  console.log('response', response);
+
   const githubUser = await $fetch<{
     avatar_url: string;
     email: string;
