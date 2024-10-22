@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
     throw new Error('No code provided');
   }
 
-  const _response = await $fetch.raw<{
+  const response = await $fetch<{
     access_token?: string;
     error?: string;
     scope?: string;
@@ -33,9 +33,6 @@ export default defineEventHandler(async (event) => {
     ignoreResponseError: true,
   });
 
-  console.log(_response.body, _response.headers, _response.status, _response.statusText, await _response.text());
-
-  const response = await _response.json();
   console.log('response', response);
 
   if (response.error) {
