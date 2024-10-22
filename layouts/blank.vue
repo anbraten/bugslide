@@ -3,7 +3,7 @@
     <header class="flex gap-4 p-4 w-full">
       <router-link class="flex items-center gap-2" to="/">
         <UIcon name="i-heroicons-fire-16-solid" class="w-5 h-5" />
-        <h1 class="text-xl">Bugslide</h1>
+        <h1 class="text-xl">BugSlide</h1>
       </router-link>
 
       <div class="ml-auto">
@@ -16,7 +16,7 @@
     </main>
 
     <footer class="p-4 mt-auto w-full flex">
-      <p class="mx-auto">Build with &lt;3</p>
+      <p class="mx-auto">Built with ❤️</p>
     </footer>
 
     <UNotifications />

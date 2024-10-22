@@ -3,6 +3,12 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   devtools: { enabled: true },
   modules: ['@nuxt/ui'],
+  app: {
+    head: {
+      title: 'BugSlide',
+      viewport: 'width=device-width, initial-scale=1',
+    },
+  },
   runtimeConfig: {
     public: {
       SENTRY_DSN_PUBLIC: '',
@@ -40,4 +46,7 @@ export default defineNuxtConfig({
       },
     },
   },
+  // nitro: {
+  //   preset: './preset',
+  // },
 });

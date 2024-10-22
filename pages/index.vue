@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col items-start">
     <h1 class="text-xl mb-4">Projects</h1>
-    <div class="flex gap-4">
+    <div class="flex gap-4 flex-wrap">
       <router-link v-for="project in projects" :to="`/projects/${project.id}`" :key="project.id" class="min-w-64">
         <UCard class="h-full">
           <span>{{ project.name }}</span>

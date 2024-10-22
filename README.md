@@ -3,6 +3,16 @@
 Simple error tracker that can be used with Sentry-compatible SDKs.
 It is designed to be self-hosted and easy to use.
 
+## Features
+
+- Capture errors from Sentry-compatible SDKs
+- Analyse errors with stack trace, breadcrumbs and release information
+- Receive email alerts when new error is captured
+
+![Screenshot error](./docs/screenshot_error.png)
+
+![Screenshot errors list](./docs/screenshot_errors_list.png)
+
 ## Setup client (browser)
 
 1. Install dependencies:
@@ -36,34 +46,33 @@ Sentry.captureMessage('Hello, world!');
 ## TODO
 
 - [ ] Fix events counter race-condition when inserting multiple events at once
-- [ ] Add support for multiple projects
+- [x] Add support for multiple projects
   - [ ] Add new project
   - [ ] Delete project
-- [ ] Add authentication
+- [x] Add authentication
   - [x] Login / Register
   - [x] Logout
+  - [x] Only return projects that user is assigned to
   - [ ] Assign user to project
-  - [ ] Only return projects that user is assigned to
 - [ ] Source maps
   - [ ] Upload source maps
   - [ ] Show stack trace with source maps
-- [ ] Allow to resolve issues
-  - [ ] Add button to resolve / unresolve issue
-- [ ] Allow to delete issues
+- [x] Add button to resolve, reopen, ignore errors
+- [ ] Allow to delete errors
 - [ ] Releases
   - [ ] Automatically create release when first event is received
   - [ ] Link to open release in forge
   - [ ] Upload source maps
 - [ ] Environment
   - [ ] Automatically create environment when first event is received
-- [ ] Allow filtering by
+- [x] Allow filtering by
   - [ ] Environment
   - [ ] Release
-  - [ ] Status (resolved / unresolved / ignored)
+  - [x] Status (resolved / unresolved / ignored)
 - [ ] rate limiting & quotas
   - [ ] event submission x / minute
   - [ ] delete resolved issues after x days
   - [ ] delete error event data after x days
   - [ ] delete oldest event if limit x is reached
-- [ ] Alert when new issue is created
-- [ ] Add release to first seen / last seen
+- [x] Alert via email when new issue is created
+- [ ] Add first seen / last seen in release ...

@@ -7,7 +7,7 @@
         <div class="flex gap-4 mt-2 items-center">
           <span class="font-bold text-xl">{{ error.title }} </span>
 
-          <UBadge variant="subtle" :ui="{ rounded: 'rounded-full' }" color="orange" size="sm">New</UBadge>
+          <ErrorState :error />
 
           <div class="flex flex-col items-center ml-auto">
             <span class="text-sm text-gray-600 dark:text-gray-400">Events</span>
@@ -23,6 +23,34 @@
             <span class="text-sm text-gray-600 dark:text-gray-400">First Seen</span>
             <span class="text-xl">{{ timeAgo(error.createdAt) }}</span>
           </div>
+
+          <div v-if="error.state === 'open'" class="flex gap-2">
+            <UButton
+              icon="i-heroicons-check"
+              color="green"
+              label="Resolve"
+              size="sm"
+              @click="changeState('closed')"
+              class="ml-2"
+            />
+            <UButton
+              icon="i-heroicons-x-mark"
+              color="gray"
+              label="Ignore"
+              size="sm"
+              @click="changeState('ignored')"
+              class="ml-2"
+            />
+          </div>
+          <UButton
+            v-else-if="error.state === 'closed' || error.state === 'ignored'"
+            icon="i-heroicons-arrow-uturn-left"
+            color="gray"
+            label="Reopen"
+            size="sm"
+            @click="changeState('open')"
+            class="ml-4"
+          />
         </div>
 
         <pre class="p-2 bg-gray-200 dark:bg-gray-800 rounded-md whitespace-pre-wrap w-full mt-2 mb-4">{{
@@ -112,7 +140,7 @@ const route = useRoute();
 
 const projectId = computed(() => route.params.projectId as string);
 const errorId = computed(() => route.params.errorId as string);
-const { data: error } = await useFetch(() => `/api/${projectId.value}/errors/${errorId.value}`);
+const { data: error, refresh: refreshError } = await useFetch(() => `/api/${projectId.value}/errors/${errorId.value}`);
 
 const errorEventId = ref(1);
 const { data: errorEvent } = await useFetch(
@@ -156,6 +184,17 @@ const userAgent = computed(() => {
     os: ua.getOS(),
   };
 });
+
+async function changeState(state: 'open' | 'closed' | 'ignored') {
+  await fetch(`/api/${projectId.value}/errors/${errorId.value}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ state }),
+  });
+  await refreshError();
+}
 </script>
 
 <style scoped>

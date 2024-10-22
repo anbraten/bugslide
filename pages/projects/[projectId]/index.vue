@@ -9,7 +9,11 @@
                 <UCheckbox class="mb-auto mx-auto" />
               </div>
             </th>
-            <th></th>
+            <th>
+              <div class="flex">
+                <USelect v-model="state" :options="['open', 'closed', 'ignored']" />
+              </div>
+            </th>
             <th>Events</th>
           </tr>
         </thead>
@@ -29,9 +33,7 @@
                 </router-link>
 
                 <div class="flex gap-4 mt-2">
-                  <UBadge variant="subtle" :ui="{ rounded: 'rounded-full' }" color="orange" size="sm">{{
-                    error.state
-                  }}</UBadge>
+                  <ErrorState :error />
                   <span>{{ timeAgo(error.lastOccurrence) }} ago | {{ timeAgo(error.createdAt) }} old</span>
                 </div>
               </div>
@@ -49,8 +51,13 @@
 <script lang="ts" setup>
 const route = useRoute();
 
+const state = ref<'open' | 'closed' | 'ignored'>('open');
 const projectId = computed(() => route.params.projectId);
 const { data: errors } = await useFetch(() => `/api/${projectId.value}/errors`, {
+  query: computed(() => ({
+    state: state.value,
+  })),
   default: () => [],
+  watch: [state],
 });
 </script>
