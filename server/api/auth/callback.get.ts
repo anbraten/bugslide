@@ -21,14 +21,16 @@ export default defineEventHandler(async (event) => {
       code,
       grant_type: 'authorization_code',
     },
-    ignoreResponseError: true,
+    headers: {
+      'User-Agent': 'Nitro',
+    },
   });
   if (response.error) {
     console.error(response.error);
     throw new Error('Error getting access token');
   }
 
-  const _githubUser = await $fetch.raw<{
+  const githubUser = await $fetch<{
     avatar_url: string;
     email: string;
     id: number;
@@ -37,16 +39,9 @@ export default defineEventHandler(async (event) => {
   }>('https://api.github.com/user', {
     headers: {
       Authorization: `Bearer ${response.access_token}`,
+      'User-Agent': 'Nitro',
     },
-    ignoreResponseError: true,
   });
-
-  if (!_githubUser.ok) {
-    console.error(_githubUser.status, _githubUser.statusText, await _githubUser.text());
-    throw new Error('Error getting user');
-  }
-
-  const githubUser = await _githubUser.json();
 
   let email: string | null = githubUser.email;
   // if no public email, check the private ones
@@ -59,6 +54,7 @@ export default defineEventHandler(async (event) => {
     >('https://api.github.com/user/emails', {
       headers: {
         Authorization: `Bearer ${response.access_token}`,
+        'User-Agent': 'Nitro',
       },
     });
     const primaryEmail = emails.find((email: any) => email.primary);
