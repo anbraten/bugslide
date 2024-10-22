@@ -21,7 +21,7 @@
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.35.1",
     "nodemailer": "^6.9.15",
-    "nuxt": "^3.13.0",
+    "nuxt": "^3.13.2",
     "ua-parser-js": "^1.0.39",
     "vue": "latest",
     "vue-router": "latest"

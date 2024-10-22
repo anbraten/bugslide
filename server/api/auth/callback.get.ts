@@ -3,21 +3,12 @@ export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig(event);
   const session = await useAuthSession(event);
 
-  const { state, code } = getQuery(event);
-  if (!state) {
-    throw createError({
-      status: 400,
-      message: 'Missing state query parameter',
-    });
-  }
-
-  // TODO: check if state is valid
-
+  const { code } = getQuery(event);
   if (!code) {
     throw new Error('No code provided');
   }
 
-  const _response = await $fetch.raw<{
+  const response = await $fetch<{
     access_token?: string;
     error?: string;
     scope?: string;
@@ -30,14 +21,10 @@ export default defineEventHandler(async (event) => {
       code,
       grant_type: 'authorization_code',
     },
-    ignoreResponseError: true,
+    headers: {
+      'User-Agent': 'Nitro',
+    },
   });
-
-  console.log(_response.body, _response.headers, _response.status, _response.statusText, await _response.text());
-
-  const response = await _response.json();
-  console.log('response', response);
-
   if (response.error) {
     console.error(response.error);
     throw new Error('Error getting access token');
@@ -52,6 +39,7 @@ export default defineEventHandler(async (event) => {
   }>('https://api.github.com/user', {
     headers: {
       Authorization: `Bearer ${response.access_token}`,
+      'User-Agent': 'Nitro',
     },
   });
 
@@ -66,6 +54,7 @@ export default defineEventHandler(async (event) => {
     >('https://api.github.com/user/emails', {
       headers: {
         Authorization: `Bearer ${response.access_token}`,
+        'User-Agent': 'Nitro',
       },
     });
     const primaryEmail = emails.find((email: any) => email.primary);
