@@ -23,15 +23,12 @@ export default defineEventHandler(async (event) => {
     },
     ignoreResponseError: true,
   });
-
-  console.log('response', response);
-
   if (response.error) {
     console.error(response.error);
     throw new Error('Error getting access token');
   }
 
-  const githubUser = await $fetch<{
+  const _githubUser = await $fetch.raw<{
     avatar_url: string;
     email: string;
     id: number;
@@ -41,7 +38,15 @@ export default defineEventHandler(async (event) => {
     headers: {
       Authorization: `Bearer ${response.access_token}`,
     },
+    ignoreResponseError: true,
   });
+
+  if (!_githubUser.ok) {
+    console.error(_githubUser.status, _githubUser.statusText, await _githubUser.text());
+    throw new Error('Error getting user');
+  }
+
+  const githubUser = await _githubUser.json();
 
   let email: string | null = githubUser.email;
   // if no public email, check the private ones
