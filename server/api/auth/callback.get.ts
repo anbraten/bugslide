@@ -3,16 +3,7 @@ export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig(event);
   const session = await useAuthSession(event);
 
-  const { state, code } = getQuery(event);
-  if (!state) {
-    throw createError({
-      status: 400,
-      message: 'Missing state query parameter',
-    });
-  }
-
-  // TODO: check if state is valid
-
+  const { code } = getQuery(event);
   if (!code) {
     throw new Error('No code provided');
   }
