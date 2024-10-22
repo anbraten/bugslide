@@ -38,23 +38,23 @@
                 <th>Reported at</th>
                 <td>{{ errorEvent?.createdAt }}</td>
               </tr>
-              <tr>
+              <tr v-if="errorEvent?.event.level">
                 <th>Level</th>
                 <td>{{ errorEvent?.event.level }}</td>
               </tr>
-              <tr>
+              <tr v-if="errorEvent?.event.platform">
                 <th>Platform</th>
                 <td>{{ errorEvent?.event.platform }}</td>
               </tr>
-              <tr>
+              <tr v-if="errorEvent?.event.environment">
                 <th class="pr-4">Environment</th>
                 <td>{{ errorEvent?.event.environment }}</td>
               </tr>
-              <tr>
+              <tr v-if="errorEvent?.event.release">
                 <th>Release</th>
                 <td>{{ errorEvent?.event.release }}</td>
               </tr>
-              <tr>
+              <tr v-if="errorEvent?.event.transaction">
                 <th>Transaction</th>
                 <td>{{ errorEvent?.event.transaction }}</td>
               </tr>
@@ -66,11 +66,11 @@
                   }}</router-link>
                 </td>
               </tr>
-              <tr v-if="userAgent">
+              <tr v-if="userAgent?.browser.name">
                 <th>Browser</th>
                 <td>{{ userAgent?.browser.name }} {{ userAgent?.browser.version }}</td>
               </tr>
-              <tr v-if="userAgent">
+              <tr v-if="userAgent?.os.name">
                 <th>OS</th>
                 <td>{{ userAgent?.os.name }}</td>
               </tr>
@@ -79,7 +79,7 @@
         </div>
 
         <div class="flex border-b border-gray-200 dark:border-gray-800 mb-2 items-center gap-2">
-          <UHorizontalNavigation :links="subPages" />
+          <UHorizontalNavigation v-if="error && errorEvent" :links="subPages" />
 
           <span class="ml-auto">[{{ errorEventId }}]</span>
 
@@ -99,7 +99,7 @@
           />
         </div>
 
-        <NuxtPage :error :errorEvent />
+        <NuxtPage v-if="error && errorEvent" :error :errorEvent />
       </div>
     </UCard>
   </div>
@@ -123,7 +123,7 @@ useSeoMeta({
   title: () => error.value?.title ?? `Error: ${errorId.value}`,
 });
 
-const subPages = [
+const subPages = computed(() => [
   {
     label: 'Stacktrace',
     icon: 'i-heroicons-bolt-solid',
@@ -142,7 +142,7 @@ const subPages = [
     to: `/projects/${projectId.value}/errors/${errorId.value}/details`,
     exact: true,
   },
-];
+]);
 
 const userAgent = computed(() => {
   const headers = errorEvent.value?.event?.request?.headers;

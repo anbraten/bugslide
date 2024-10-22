@@ -83,7 +83,7 @@ export default defineEventHandler(async (event) => {
   };
 });
 
-async function saveError(event: H3Event, project: any, exception: Exception, errorEvent: Event) {
+async function saveError(event: H3Event, project: Project, exception: Exception, errorEvent: Event) {
   const db = await useDb(event);
 
   // check if error already exists
@@ -105,6 +105,11 @@ async function saveError(event: H3Event, project: any, exception: Exception, err
   }
 
   if (error) {
+    if (error.state === 'closed') {
+      // send error mail as the error will be reopened
+      await sendErrorMail(event, project, error);
+    }
+
     // update error
     await db
       .update(errorsTable)
@@ -133,19 +138,8 @@ async function saveError(event: H3Event, project: any, exception: Exception, err
 
     error = res?.[0];
 
-    // send error mail to all project members
-    const users = await db
-      .select()
-      .from(usersTable)
-      .leftJoin(userProjectsTable, eq(usersTable.id, userProjectsTable.userId))
-      .where(eq(userProjectsTable.projectId, project.id));
-
-    for await (const user of users) {
-      if (!user.users.email) {
-        continue;
-      }
-      await sendNewErrorMail(event, user.users.email, error);
-    }
+    // send new error mail
+    await sendErrorMail(event, project, error);
   }
 
   if (!error) {
@@ -159,4 +153,48 @@ async function saveError(event: H3Event, project: any, exception: Exception, err
     stacktrace: exception.stacktrace,
     event: errorEvent,
   });
+}
+
+export async function sendErrorMail(event: H3Event, project: Project, error: CaughtError) {
+  const mail = useMail(event);
+  if (!mail) {
+    return;
+  }
+
+  const db = await useDb(event);
+
+  const config = useRuntimeConfig(event);
+  const url = `${config.publicHost}/projects/${project.id}/errors/${error.id}`;
+  const text = `
+An error just occurred:
+
+${error.title}:
+
+'''
+${error.value}
+'''
+
+For more details, please visit: ${url}
+  `.trim();
+
+  // send error mail to all project members
+  const users = await db
+    .select()
+    .from(usersTable)
+    .leftJoin(userProjectsTable, eq(usersTable.id, userProjectsTable.userId))
+    .where(eq(userProjectsTable.projectId, error.projectId));
+
+  for await (const user of users) {
+    if (!user.users.email) {
+      continue;
+    }
+
+    console.log('Sending error mail to', user.users.email);
+
+    await mail.sendMail({
+      to: user.users.email,
+      subject: `🔥 New Error in ${project.name}: ${error.title.slice(0, 50)}`,
+      text,
+    });
+  }
 }

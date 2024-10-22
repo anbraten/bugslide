@@ -30,6 +30,7 @@ export const projectsTable = sqliteTable('projects', {
   id: int().primaryKey({ autoIncrement: true }),
   name: text(),
 });
+export type Project = InferSelectModel<typeof projectsTable>;
 
 export const usersTable = sqliteTable('users', {
   id: int('id').primaryKey(),
@@ -62,7 +63,7 @@ export const errorsTable = sqliteTable('errors', {
   events: int().notNull(),
   lastOccurrence: int({ mode: 'timestamp' }).notNull(),
 });
-export type Error = InferSelectModel<typeof errorsTable>;
+export type CaughtError = InferSelectModel<typeof errorsTable>;
 
 export const errorEventsTable = sqliteTable('error_events', {
   id: int().primaryKey({ autoIncrement: true }),
