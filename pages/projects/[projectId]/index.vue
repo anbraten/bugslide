@@ -42,6 +42,16 @@
               <span>{{ error.events }}</span>
             </td>
           </tr>
+          <tr v-if="errors.length === 0">
+            <td class="text-center p-4" colspan="3">
+              <div class="flex flex-col">
+                <span class="text-lg">No errors yet! 😊</span>
+                <router-link :to="`/projects/${projectId}/setup`" class="text-blue-500 dark:text-blue-400"
+                  >Setup</router-link
+                >
+              </div>
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
