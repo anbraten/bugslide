@@ -139,7 +139,11 @@ async function saveError(event: H3Event, project: Project, exception: Exception,
     error = res?.[0];
 
     // send new error mail
-    await sendErrorMail(event, project, error);
+    try {
+      await sendErrorMail(event, project, error);
+    } catch (error) {
+      console.log('Failed to send error mail:', error);
+    }
   }
 
   if (!error) {
