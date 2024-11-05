@@ -6,7 +6,7 @@
         <h1 class="text-xl">BugSlide</h1>
       </router-link>
 
-      <UInput placeholder="Search for errors ..." size="lg" class="flex-grow max-w-2xl mx-auto" />
+      <!-- <UInput placeholder="Search for errors ..." size="lg" class="flex-grow max-w-2xl mx-auto" /> -->
 
       <div class="ml-auto flex items-center gap-2">
         <ColorMode />
