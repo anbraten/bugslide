@@ -1,8 +1,8 @@
 <template>
   <div>
-    <UButton :to="`/projects/${projectId}`" icon="i-mdi-arrow-left" label="Back" color="gray" class="mb-4" />
-
     <UCard v-if="error">
+      <UButton :to="`/projects/${projectId}`" icon="i-mdi-arrow-left" label="Back" color="gray" class="mb-4" />
+
       <div class="flex flex-col p-2">
         <div class="flex gap-4 mt-2 items-center">
           <span class="font-bold text-xl">{{ error.title }} </span>
