@@ -11,7 +11,7 @@
             </th>
             <th>
               <div class="flex">
-                <USelect v-model="state" :options="['open', 'closed', 'ignored']" />
+                <USelect v-model="state" :options="['open', 'resolved', 'ignored']" />
               </div>
             </th>
             <th>Events</th>
@@ -61,7 +61,7 @@
 <script lang="ts" setup>
 const route = useRoute();
 
-const state = ref<'open' | 'closed' | 'ignored'>('open');
+const state = ref<'open' | 'resolved' | 'ignored'>('open');
 const projectId = computed(() => route.params.projectId);
 const { data: errors } = await useFetch(() => `/api/${projectId.value}/errors`, {
   query: computed(() => ({

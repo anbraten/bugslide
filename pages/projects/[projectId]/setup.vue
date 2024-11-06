@@ -9,14 +9,14 @@
 <script lang="ts" setup>
 const route = useRoute();
 
-const secret = computed(() => 'can-be-ignored');
+const publicSecret = computed(() => 'can-be-ignored');
 
 const setupCode = computed(() =>
   `
 import * as Sentry from '@sentry/browser';
 
 Sentry.init({
-  dsn: '${window?.location?.protocol}//${secret.value}@${window?.location?.host}/${route.params.projectId}',
+  dsn: '${window?.location?.protocol}//${publicSecret.value}@${window?.location?.host}/${route.params.projectId}',
   environment: 'development',
   release: 'commit:abcdefg12345',
   integrations: [

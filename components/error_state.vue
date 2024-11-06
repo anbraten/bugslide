@@ -3,7 +3,7 @@
     >Open</UBadge
   >
   <UBadge
-    v-else-if="error.state === 'closed'"
+    v-else-if="error.state === 'resolved'"
     variant="subtle"
     :ui="{ rounded: 'rounded-full' }"
     color="green"

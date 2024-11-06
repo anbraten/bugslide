@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const body = await readBody<{
-    state?: 'open' | 'closed' | 'ignored';
+    state?: 'open' | 'resolved' | 'ignored';
   }>(event);
 
   const error = await db

@@ -2,7 +2,7 @@
   <div class="flex flex-col w-full h-screen">
     <header class="flex gap-4 p-4 w-full">
       <router-link class="flex items-center gap-2" to="/">
-        <UIcon name="i-heroicons-fire-16-solid" class="w-5 h-5" />
+        <UIcon name="i-lucide-flame" class="w-5 h-5" />
         <h1 class="text-xl">BugSlide</h1>
       </router-link>
 

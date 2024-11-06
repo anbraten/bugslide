@@ -1,8 +1,8 @@
 <template>
   <div>
-    <UCard v-if="error">
-      <UButton :to="`/projects/${projectId}`" icon="i-mdi-arrow-left" label="Back" color="gray" class="mb-4" />
+    <UButton :to="`/projects/${projectId}`" icon="i-mdi-arrow-left" label="Back" color="gray" class="mb-4" />
 
+    <UCard v-if="error">
       <div class="flex flex-col p-2">
         <div class="flex gap-4 mt-2 items-center">
           <span class="font-bold text-xl">{{ error.title }} </span>
@@ -30,7 +30,7 @@
               color="green"
               label="Resolve"
               size="sm"
-              @click="changeState('closed')"
+              @click="changeState('resolved')"
               class="ml-2"
             />
             <UButton
@@ -43,7 +43,7 @@
             />
           </div>
           <UButton
-            v-else-if="error.state === 'closed' || error.state === 'ignored'"
+            v-else-if="error.state === 'resolved' || error.state === 'ignored'"
             icon="i-heroicons-arrow-uturn-left"
             color="gray"
             label="Reopen"
@@ -57,10 +57,32 @@
           error.value
         }}</pre>
 
-        <div v-if="errorEvent?.event" class="flex flex-col items-start mb-4">
-          <span class="mb-2 font-bold">Event metadata ({{ errorEvent.event.event_id?.slice(0, 8) }})</span>
+        <div class="flex flex-col items-start mb-4">
+          <div class="flex items-center w-full gap-2">
+            <span v-if="errorEvent?.event" class="mb-2 font-bold"
+              >Event metadata ({{ errorEvent?.event?.event_id?.slice(0, 8) }})</span
+            >
 
-          <table class="striped">
+            <UButton
+              icon="i-mdi-chevron-left"
+              color="gray"
+              size="sm"
+              label="Older"
+              class="ml-auto"
+              :disabled="errorEventId === 1"
+              @click="errorEventId = errorEventId - 1"
+            />
+            <UButton
+              icon="i-mdi-chevron-right"
+              color="gray"
+              size="sm"
+              label="Newer"
+              :disabled="errorEventId === error.events"
+              @click="errorEventId = errorEventId + 1"
+            />
+          </div>
+
+          <table v-if="errorEvent?.event" class="striped">
             <tbody class="text-left">
               <tr>
                 <th>Reported at</th>
@@ -108,23 +130,6 @@
 
         <div class="flex border-b border-gray-200 dark:border-gray-800 mb-2 items-center gap-2">
           <UHorizontalNavigation v-if="error && errorEvent" :links="subPages" />
-
-          <span class="ml-auto">[{{ errorEventId }}]</span>
-
-          <UButton
-            icon="i-mdi-chevron-left"
-            color="gray"
-            size="sm"
-            :disabled="errorEventId === 1"
-            @click="errorEventId = errorEventId - 1"
-          />
-          <UButton
-            icon="i-mdi-chevron-right"
-            color="gray"
-            size="sm"
-            :disabled="errorEventId === error.events"
-            @click="errorEventId = errorEventId + 1"
-          />
         </div>
 
         <NuxtPage v-if="error && errorEvent" :error :errorEvent />
@@ -185,7 +190,7 @@ const userAgent = computed(() => {
   };
 });
 
-async function changeState(state: 'open' | 'closed' | 'ignored') {
+async function changeState(state: 'open' | 'resolved' | 'ignored') {
   await fetch(`/api/${projectId.value}/errors/${errorId.value}`, {
     method: 'PATCH',
     headers: {

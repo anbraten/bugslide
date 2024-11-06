@@ -105,7 +105,7 @@ async function saveError(event: H3Event, project: Project, exception: Exception,
   }
 
   if (error) {
-    if (error.state === 'closed') {
+    if (error.state === 'resolved') {
       // send error mail as the error will be reopened
       await sendErrorMail(event, project, error);
     }
@@ -114,7 +114,7 @@ async function saveError(event: H3Event, project: Project, exception: Exception,
     await db
       .update(errorsTable)
       .set({
-        state: 'open', // reopen error in case it was closed
+        state: 'open', // reopen error in case it was resolved
         events: error.events + 1,
         updatedAt: new Date(),
         lastOccurrence: new Date(),
