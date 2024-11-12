@@ -60,8 +60,6 @@ defineProps<{
 }>();
 
 function getColor(breadcrumb: Breadcrumb): 'red' | 'blue' | 'green' | 'gray' {
-  throw new Error('Not implemented yet!');
-
   if (breadcrumb.category === 'console') {
     return 'gray';
   }
