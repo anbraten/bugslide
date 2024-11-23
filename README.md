@@ -59,7 +59,7 @@ Sentry.captureMessage('Hello, world!');
   - [ ] Show stack trace with source maps
 - [x] Add button to resolve, reopen, ignore errors
 - [ ] Allow to delete errors
-- [ ] Releases
+- [x] Releases
   - [ ] Automatically create release when first event is received
   - [ ] Link to open release in forge
   - [ ] Upload source maps
@@ -69,6 +69,11 @@ Sentry.captureMessage('Hello, world!');
   - [ ] Environment
   - [ ] Release
   - [x] Status (resolved / unresolved / ignored)
+- [ ] Multiedit
+  - [ ] Allow ignoring multiple errors at once
+  - [ ] Allow resolving multiple errors at once
+- [ ] Pagination
+  - [ ] Paginate errors
 - [ ] rate limiting & quotas
   - [ ] event submission x / minute
   - [ ] delete resolved issues after x days

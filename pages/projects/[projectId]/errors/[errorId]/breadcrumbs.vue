@@ -41,7 +41,7 @@
           }"
           >{{ breadcrumb.level || 'info' }}</span
         >
-        <span v-if="breadcrumb.timestamp">{{ new Date(breadcrumb.timestamp).toLocaleString() }}</span>
+        <span v-if="breadcrumb.timestamp">{{ new Date(breadcrumb.timestamp * 1000).toLocaleString() }}</span>
       </div>
       <span>{{ breadcrumb.message }}</span>
       <pre v-if="breadcrumb.data" class="p-2 bg-gray-200 dark:bg-gray-800 rounded-md whitespace-pre-wrap">{{

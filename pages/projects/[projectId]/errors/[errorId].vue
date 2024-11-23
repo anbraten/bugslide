@@ -86,7 +86,7 @@
             <tbody class="text-left">
               <tr>
                 <th>Reported at</th>
-                <td>{{ errorEvent?.createdAt }}</td>
+                <td>{{ new Date(errorEvent?.createdAt).toLocaleString() }}</td>
               </tr>
               <tr v-if="errorEvent?.event.level">
                 <th>Level</th>
