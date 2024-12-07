@@ -1,0 +1,1 @@
+ALTER TABLE `projects` ADD `publicSecret` text NOT NULL;
