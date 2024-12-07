@@ -13,10 +13,13 @@
 </template>
 
 <script lang="ts" setup>
+import type { Project } from '~/server/utils/db';
+
 const route = useRoute();
 
-const publicSecret = computed(() => 'can-be-ignored');
+const { data: project } = await useFetch<Project>(`/api/${route.params.projectId as string}`);
+
 const dsn = computed(
-  () => `${window?.location?.protocol}//${publicSecret.value}@${window?.location?.host}/${route.params.projectId}`,
+  () => `${window?.location?.protocol}//${project.value?.publicSecret ?? ''}@${window?.location?.host}/${route.params.projectId}`,
 );
 </script>
