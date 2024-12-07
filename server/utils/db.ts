@@ -29,6 +29,7 @@ export async function getFirstElement<T>(p: Promise<T[]>): Promise<T | null> {
 export const projectsTable = sqliteTable('projects', {
   id: int().primaryKey({ autoIncrement: true }),
   name: text(),
+  publicSecret: text().notNull(),
 });
 export type Project = InferSelectModel<typeof projectsTable>;
 
