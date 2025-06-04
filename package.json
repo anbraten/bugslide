@@ -14,7 +14,6 @@
     "db:ui": "bun drizzle-kit studio"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.821.0",
     "@libsql/client": "^0.15.8",
     "@nuxt/ui": "^2.18.7",
     "@sentry/core": "^9.26.0",
@@ -22,8 +21,7 @@
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.44.2",
     "nodemailer": "^6.9.16",
-    "nuxt": "^3.17.5",
-    "source-map": "^0.7.4",
+    "nuxt": "^3.14.0",
     "ua-parser-js": "^1.0.39",
     "vue": "latest",
     "vue-router": "latest"
