@@ -14,18 +14,18 @@
     "db:ui": "pnpm drizzle-kit studio"
   },
   "dependencies": {
-    "@libsql/client": "^0.15.8",
+    "@libsql/client": "^0.14.0",
     "@nuxt/ui": "^2.18.7",
-    "@sentry/core": "^9.26.0",
-    "dotenv": "^16.4.5",
-    "drizzle-orm": "^0.44.2",
+    "@sentry/core": "^8.36.0",
+    "drizzle-orm": "^0.36.0",
     "nodemailer": "^6.9.16",
-    "nuxt": "^3.17.5",
+    "nuxt": "^3.14.0",
     "ua-parser-js": "^2.0.3"
   },
   "devDependencies": {
     "@types/nodemailer": "^6.4.16",
     "@types/ua-parser-js": "^0.7.39",
+    "dotenv": "^16.5.0",
     "drizzle-kit": "^0.27.1"
   }
 }
