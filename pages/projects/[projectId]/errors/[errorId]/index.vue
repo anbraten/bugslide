@@ -50,7 +50,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Event, Exception, Stacktrace } from '@sentry/types';
+import type { Event, Exception, Stacktrace } from '@sentry/core';
 
 const props = defineProps<{
   error: Exception;

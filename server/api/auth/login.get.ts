@@ -1,5 +1,3 @@
-import { randomBytes } from 'crypto';
-
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig(event);
 

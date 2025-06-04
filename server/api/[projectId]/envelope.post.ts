@@ -1,5 +1,4 @@
-import { Event, EventItem, Exception } from '@sentry/types';
-import { parseEnvelope, forEachEnvelopeItem } from '@sentry/utils';
+import { parseEnvelope, forEachEnvelopeItem, Exception, EventItem, Event } from '@sentry/core';
 import { and, eq } from 'drizzle-orm';
 import type { H3Event } from 'h3';
 

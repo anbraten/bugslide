@@ -52,7 +52,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Breadcrumb, Event, Exception } from '@sentry/types';
+import type { Breadcrumb, Event, Exception } from '@sentry/core';
 
 defineProps<{
   error: Exception;

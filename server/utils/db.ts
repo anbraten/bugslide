@@ -1,7 +1,7 @@
 import { int, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
-import { Event, Stacktrace } from '@sentry/types';
+import { Event, Stacktrace } from '@sentry/core';
 import { InferSelectModel } from 'drizzle-orm';
 import type { H3Event } from 'h3';
 
