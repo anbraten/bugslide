@@ -1,0 +1,42 @@
+import { StackFrame } from '@sentry/core';
+import { resolveSourceFrames } from '~/server/utils/source-map';
+
+type ResolvedFrame = {
+  source: string;
+  line: number;
+  column: number;
+  name?: string;
+  context?: string[];
+};
+
+export default defineEventHandler(async (event) => {
+  const project = await requireProject(event, getRouterParam(event, 'projectId'));
+
+  const release = getRouterParam(event, 'releaseId');
+  if (!release) {
+    throw createError({
+      statusCode: 400,
+      message: 'Release parameter is required.',
+    });
+  }
+
+  const { frames } = await readBody<{ frames: StackFrame[] }>(event);
+  if (!frames || !Array.isArray(frames)) {
+    throw createError({
+      statusCode: 400,
+      message: 'Invalid request body, expected an array of stack frames.',
+    });
+  }
+
+  const resolvedFrames = await resolveSourceFrames(project.id.toString(), release, frames);
+
+  return resolvedFrames
+    .filter((frame): frame is ResolvedFrame => frame !== undefined)
+    .map((frame) => ({
+      source: frame.source,
+      line: frame.line,
+      column: frame.column,
+      name: frame.name,
+      context: frame.context,
+    }));
+});

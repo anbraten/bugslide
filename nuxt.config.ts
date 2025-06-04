@@ -30,6 +30,14 @@ export default defineNuxtConfig({
       requireTLS: false,
       from: '',
     },
+    s3: {
+      endpoint: '',
+      forcePathStyle: true,
+      region: 'unknown',
+      accessKey: '',
+      secretKey: '',
+      bucket: '',
+    },
   },
   $development: {
     runtimeConfig: {

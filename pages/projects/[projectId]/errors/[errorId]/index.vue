@@ -50,12 +50,17 @@
 </template>
 
 <script lang="ts" setup>
-import type { Event, Exception, Stacktrace } from '@sentry/core';
+import type { Event, Exception, Stacktrace, StackFrame } from '@sentry/core';
+
+const route = useRoute();
 
 const props = defineProps<{
   error: Exception;
   errorEvent: { event: Event; stacktrace: Stacktrace };
 }>();
+
+const projectId = computed(() => route.params.projectId as string);
+const release = computed(() => 'latest'); // TODO: use release from error
 
 function trimLeading(str: string, length: number) {
   return str.length > length ? `...${str.slice(str.length - length)}` : str;
@@ -86,4 +91,19 @@ const frames = computed(() => {
 function isRelevantFrame(frame: any) {
   return !frame.filename?.includes('node_modules/');
 }
+
+const resolvedFrames = ref<StackFrame[]>();
+
+watch(
+  frames,
+  async (newFrames) => {
+    resolvedFrames.value = await $fetch(`/api/${projectId.value}/releases/${release.value}/resolve-stack-frame`, {
+      method: 'POST',
+      body: {
+        frames: newFrames,
+      },
+    });
+  },
+  { immediate: true },
+);
 </script>
