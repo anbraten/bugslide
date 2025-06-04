@@ -11,10 +11,6 @@ export default defineNuxtConfig({
     },
   },
   runtimeConfig: {
-    public: {
-      SENTRY_DSN_PUBLIC: '',
-      RELEASE: '',
-    },
     publicHost: '',
     auth: {
       password: '',
@@ -37,17 +33,10 @@ export default defineNuxtConfig({
   },
   $development: {
     runtimeConfig: {
-      public: {
-        SENTRY_DSN_PUBLIC: 'http://public@localhost:3000/3',
-        RELEASE: 'commit:abcdefg12345',
-      },
       publicHost: 'http://localhost:3000',
       auth: {
         password: 'a-32-plus-characters-long-password',
       },
     },
   },
-  // nitro: {
-  //   preset: './preset',
-  // },
 });

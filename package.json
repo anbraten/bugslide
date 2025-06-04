@@ -8,28 +8,24 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "db:push": "bun drizzle-kit push",
-    "db:generate": "bun drizzle-kit generate",
-    "db:up": "bun drizzle-kit up",
-    "db:ui": "bun drizzle-kit studio"
+    "db:push": "pnpm drizzle-kit push",
+    "db:generate": "pnpm drizzle-kit generate",
+    "db:up": "pnpm drizzle-kit up",
+    "db:ui": "pnpm drizzle-kit studio"
   },
   "dependencies": {
     "@libsql/client": "^0.15.8",
     "@nuxt/ui": "^2.18.7",
     "@sentry/core": "^9.26.0",
-    "@sentry/vue": "^9.26.0",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.44.2",
     "nodemailer": "^6.9.16",
-    "nuxt": "^3.14.0",
-    "ua-parser-js": "^1.0.39",
-    "vue": "latest",
-    "vue-router": "latest"
+    "nuxt": "^3.17.5",
+    "ua-parser-js": "^2.0.3"
   },
   "devDependencies": {
     "@types/nodemailer": "^6.4.16",
     "@types/ua-parser-js": "^0.7.39",
-    "drizzle-kit": "^0.27.1",
-    "tsx": "^4.19.2"
+    "drizzle-kit": "^0.27.1"
   }
 }
