@@ -3,6 +3,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   devtools: { enabled: true },
   modules: ['@nuxt/ui'],
+  sourcemap: true,
   app: {
     head: {
       title: 'BugSlide',
