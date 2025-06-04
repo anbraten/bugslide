@@ -199,6 +199,7 @@ For more details, please visit: ${url}
       to: user.users.email,
       subject: `🔥 New Error in ${project.name}: ${error.title.slice(0, 50)}`,
       text,
+      from: config.mail.from,
     });
   }
 }
