@@ -106,7 +106,11 @@ async function saveError(event: H3Event, project: Project, exception: Exception,
   if (error) {
     if (error.state === 'resolved') {
       // send error mail as the error will be reopened
-      await sendErrorMail(event, project, error);
+      try {
+        await sendErrorMail(event, project, error);
+      } catch (error) {
+        console.error('Failed to send error mail:', error);
+      }
     }
 
     // update error
@@ -141,7 +145,7 @@ async function saveError(event: H3Event, project: Project, exception: Exception,
     try {
       await sendErrorMail(event, project, error);
     } catch (error) {
-      console.log('Failed to send error mail:', error);
+      console.error('Failed to send error mail:', error);
     }
   }
 
@@ -169,7 +173,7 @@ export async function sendErrorMail(event: H3Event, project: Project, error: Cau
   const config = useRuntimeConfig(event);
   const url = `${config.publicHost}/projects/${project.id}/errors/${error.id}`;
   const text = `
-An error just occurred:
+An error just occurred in your project **${project.name}**:
 
 ${error.title}:
 

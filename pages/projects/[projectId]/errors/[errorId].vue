@@ -108,6 +108,10 @@
                 <th>Transaction</th>
                 <td>{{ errorEvent?.event.transaction }}</td>
               </tr>
+              <tr v-if="errorEvent?.event.server_name">
+                <th>Server name</th>
+                <td>{{ errorEvent?.event.server_name }}</td>
+              </tr>
               <tr v-if="errorEvent?.event.request?.url">
                 <th>Url</th>
                 <td>

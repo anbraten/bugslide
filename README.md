@@ -47,22 +47,18 @@ Sentry.captureMessage('Hello, world!');
 
 - [ ] Fix events counter race-condition when inserting multiple events at once
 - [x] Add support for multiple projects
-  - [ ] Add new project
+  - [x] Add new project
   - [ ] Delete project
-- [x] Add authentication
-  - [x] Login / Register
-  - [x] Logout
   - [x] Only return projects that user is assigned to
   - [ ] Assign user to project
-- [ ] Source maps
+- [x] Source maps
   - [ ] Upload source maps
-  - [ ] Show stack trace with source maps
+  - [x] Show stack trace with source maps
 - [x] Add button to resolve, reopen, ignore errors
 - [ ] Allow to delete errors
 - [x] Releases
   - [ ] Automatically create release when first event is received
   - [ ] Link to open release in forge
-  - [ ] Upload source maps
 - [ ] Environment
   - [ ] Automatically create environment when first event is received
 - [x] Allow filtering by
