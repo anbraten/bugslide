@@ -37,12 +37,11 @@ export async function resolveSourceFrames(projectId: string, release: string, fr
         }
 
         const sourceConsumer = sourceConsumers.get(filename) as SourceMapConsumer;
-        console.log('frame', { filename, lineno, colno }, sourceConsumers.has(filename));
 
         const resolvedFrame = await resolveSourceFrame(sourceConsumer, lineno, colno);
         return { ...frame, ...resolvedFrame };
       } catch (error) {
-        console.error('Error resolving source frame:', error);
+        // console.error('Error resolving source frame:', error);
         return frame; // Return the original frame in case of an error
       }
     }),
@@ -64,7 +63,7 @@ function sanitizeFilePath(filePath: string): string {
       const url = new URL(sanitizedPath);
       sanitizedPath = url.pathname;
     } catch (error) {
-      console.error('Invalid URL:', sanitizedPath, error);
+      // console.error('Invalid URL:', sanitizedPath, error);
       return '';
     }
   }

@@ -8,8 +8,13 @@
     </div>
 
     <div class="border dark:border-gray-800 rounded-md">
-      <div v-for="(frame, i) in resolvedFrames.toReversed()" :key="i">
-        <div class="flex gap-1 p-1 bg-gray-100 dark:bg-gray-800 border-t first:border-0 text-sm items-center">
+      <div v-for="(frame, i) in resolvedFrames" :key="i">
+        <div
+          class="flex gap-1 p-1 bg-gray-100 dark:bg-gray-800 text-sm items-center"
+          :class="{
+            'border-t dark:border-gray-800': i > 0,
+          }"
+        >
           <UTooltip v-if="frame.filename" :text="frame.filename">
             <a
               v-if="frame.filename.startsWith('http://') || frame.filename.startsWith('https://')"
@@ -26,42 +31,41 @@
           <span>at line</span>
           <span class="font-bold">{{ frame.lineno }}:{{ frame.colno }}</span>
 
-          <UBadge
-            v-if="frame.in_app"
-            variant="subtle"
-            :ui="{ rounded: 'rounded-full' }"
-            class="ml-auto"
-            color="blue"
-            size="sm"
+          <div class="ml-auto" />
+          <UBadge v-if="frame.in_app" variant="subtle" :ui="{ rounded: 'rounded-full' }" color="blue" size="sm"
             >In App</UBadge
           >
-          <UButton icon="i-mdi-chevron-down" color="gray" variant="ghost" size="sm" />
-        </div>
-
-        <div class="flex items-center p-2">
-          <div class="w-full">
-            <div v-for="(l, i) in frame.code" :key="l.line" class="flex">
-              <div
-                class="w-10 text-right border-r-2 px-2"
-                :class="{
-                  'border-red-400 bg-red-400': i === (frame.pre_context?.length ?? -1),
-                  'border-gray-300': i !== (frame.pre_context?.length ?? -1),
-                }"
-              >
-                {{ l.line }}
-              </div>
-              <pre class="ml-2">{{ l.code }}</pre>
-            </div>
-          </div>
-          <UBadge
-            v-if="!frame.vars?.resolved"
-            variant="subtle"
-            :ui="{ rounded: 'rounded-full' }"
-            class="ml-auto"
-            color="red"
-            size="sm"
+          <UBadge v-if="!frame.vars?.resolved" variant="subtle" :ui="{ rounded: 'rounded-full' }" color="red" size="sm"
             >No source map available</UBadge
           >
+          <UButton
+            :icon="openFrames.includes(i) ? 'i-mdi-chevron-up' : 'i-mdi-chevron-down'"
+            color="gray"
+            variant="ghost"
+            size="sm"
+            @click="toggleOpenFrame(i)"
+          />
+        </div>
+
+        <div v-if="openFrames.includes(i)" class="flex items-center">
+          <div class="w-full">
+            <code>
+              <div v-for="(item, index) in frame.code" :key="index" class="flex">
+                <div
+                  class="min-w-12 px-4 pt-1 select-none flex text-right content-center"
+                  :class="{ 'bg-green-600 dark:bg-green-800': item.highlight }"
+                >
+                  {{ item.line }}
+                </div>
+                <span
+                  class="whitespace-pre-wrap w-full content-center pl-4"
+                  :class="{ 'bg-gray-100 dark:bg-gray-700': item.highlight }"
+                >
+                  {{ item.code }}
+                </span>
+              </div>
+            </code>
+          </div>
         </div>
       </div>
     </div>
@@ -81,6 +85,15 @@ const props = defineProps<{
 const projectId = computed(() => route.params.projectId as string);
 const release = computed(() => 'latest'); // TODO: use release from error
 
+const openFrames = ref<number[]>([]);
+function toggleOpenFrame(index: number) {
+  if (openFrames.value.includes(index)) {
+    openFrames.value = openFrames.value.filter((i) => i !== index);
+  } else {
+    openFrames.value.push(index);
+  }
+}
+
 function trimLeading(str: string, length: number) {
   return str.length > length ? `...${str.slice(str.length - length)}` : str;
 }
@@ -97,15 +110,7 @@ function sanitizeStacktracePath(path: string) {
 }
 
 const showOnlyRelevantFrames = ref(true);
-const frames = computed(() => {
-  const _frames = props.errorEvent.stacktrace?.frames ?? [];
-
-  if (!showOnlyRelevantFrames.value) {
-    return _frames;
-  }
-
-  return _frames.filter(isRelevantFrame);
-});
+const frames = computed(() => props.errorEvent.stacktrace?.frames ?? []);
 
 function isRelevantFrame(frame: any) {
   return !frame.filename?.includes('node_modules/');
@@ -123,20 +128,51 @@ const { data: _resolvedFrames } = await useFetch<StackFrame[]>(
   },
 );
 
-const resolvedFrames = computed(() =>
-  _resolvedFrames.value.map((rf) => {
-    const startLineNo = (rf.lineno ?? 0) - (rf.pre_context?.length ?? 0);
+const resolvedFrames = computed(() => {
+  const _frames = _resolvedFrames.value
+    .map((rf) => {
+      const startLineNo = (rf.lineno ?? 0) - (rf.pre_context?.length ?? 0);
 
-    const code = [...(rf.pre_context ?? []), rf.context_line, ...(rf.post_context ?? [])].map((c, i) => ({
-      line: startLineNo + i,
-      highlight: rf.lineno === startLineNo + i,
-      code: c,
-    }));
+      const lines = [
+        ...(rf.pre_context ?? []),
+        ...(rf.context_line ? [rf.context_line] : []),
+        ...(rf.post_context ?? []),
+      ];
 
-    return {
-      ...rf,
-      code,
-    };
-  }),
+      if (lines.join('') === '') {
+        return {
+          ...rf,
+          code: [],
+        };
+      }
+
+      const code = lines.map((c, i) => ({
+        line: startLineNo + i,
+        highlight: rf.lineno === startLineNo + i,
+        code: c,
+      }));
+
+      return {
+        ...rf,
+        code,
+      };
+    })
+    .toReversed();
+
+  if (!showOnlyRelevantFrames.value) {
+    return _frames;
+  }
+
+  return _frames.filter(isRelevantFrame);
+});
+
+watch(
+  [showOnlyRelevantFrames],
+  () => {
+    openFrames.value = resolvedFrames.value
+      .map((r, i) => (isRelevantFrame(r) && r.code.length > 0 ? i : -1))
+      .filter((i) => i !== -1);
+  },
+  { immediate: true },
 );
 </script>
