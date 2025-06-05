@@ -8,7 +8,7 @@
     </div>
 
     <div class="border dark:border-gray-800 rounded-md">
-      <div v-for="(frame, i) in frames.toReversed()" :key="i">
+      <div v-for="(frame, i) in resolvedFrames.toReversed()" :key="i">
         <div class="flex gap-1 p-1 bg-gray-100 dark:bg-gray-800 border-t first:border-0 text-sm items-center">
           <UTooltip v-if="frame.filename" :text="frame.filename">
             <a
@@ -39,8 +39,27 @@
         </div>
 
         <div class="flex items-center p-2">
-          <pre>{{ frame.lineno }} {{ frame.function }}</pre>
-          <UBadge variant="subtle" :ui="{ rounded: 'rounded-full' }" class="ml-auto" color="red" size="sm"
+          <div class="w-full">
+            <div v-for="(l, i) in frame.code" :key="l.line" class="flex">
+              <div
+                class="w-10 text-right border-r-2 px-2"
+                :class="{
+                  'border-red-400 bg-red-400': i === (frame.pre_context?.length ?? -1),
+                  'border-gray-300': i !== (frame.pre_context?.length ?? -1),
+                }"
+              >
+                {{ l.line }}
+              </div>
+              <pre class="ml-2">{{ l.code }}</pre>
+            </div>
+          </div>
+          <UBadge
+            v-if="!frame.vars?.resolved"
+            variant="subtle"
+            :ui="{ rounded: 'rounded-full' }"
+            class="ml-auto"
+            color="red"
+            size="sm"
             >No source map available</UBadge
           >
         </div>
@@ -50,7 +69,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Event, Exception, Stacktrace, StackFrame } from '@sentry/core';
+import type { Event, Exception, StackFrame, Stacktrace } from '@sentry/core';
 
 const route = useRoute();
 
@@ -92,18 +111,32 @@ function isRelevantFrame(frame: any) {
   return !frame.filename?.includes('node_modules/');
 }
 
-const resolvedFrames = ref<StackFrame[]>();
-
-watch(
-  frames,
-  async (newFrames) => {
-    resolvedFrames.value = await $fetch(`/api/${projectId.value}/releases/${release.value}/resolve-stack-frame`, {
-      method: 'POST',
-      body: {
-        frames: newFrames,
-      },
-    });
+const { data: _resolvedFrames } = await useFetch<StackFrame[]>(
+  () => `/api/${projectId.value}/releases/${release.value}/resolve-stack-frame`,
+  {
+    watch: [frames],
+    method: 'POST',
+    body: computed(() => ({
+      frames: frames.value,
+    })),
+    default: () => [],
   },
-  { immediate: true },
+);
+
+const resolvedFrames = computed(() =>
+  _resolvedFrames.value.map((rf) => {
+    const startLineNo = (rf.lineno ?? 0) - (rf.pre_context?.length ?? 0);
+
+    const code = [...(rf.pre_context ?? []), rf.context_line, ...(rf.post_context ?? [])].map((c, i) => ({
+      line: startLineNo + i,
+      highlight: rf.lineno === startLineNo + i,
+      code: c,
+    }));
+
+    return {
+      ...rf,
+      code,
+    };
+  }),
 );
 </script>

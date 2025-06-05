@@ -23,24 +23,27 @@ function streamToString(stream: Readable): Promise<string> {
 
 export async function resolveSourceFrames(projectId: string, release: string, frames: StackFrame[]) {
   const sourceConsumers = new Map<string, SourceMapConsumer>();
-  const resolvedFrames: (ResolvedFrame | undefined)[] = await Promise.all(
+  const resolvedFrames: (StackFrame | undefined)[] = await Promise.all(
     frames.map(async (frame) => {
-      const { filename, lineno, colno } = frame;
-      if (!filename || !lineno || !colno) {
-        return;
-      }
-
-      if (!sourceConsumers.has(filename)) {
-        sourceConsumers.set(filename, await getSourceConsumer(projectId, release, filename));
-      }
-
-      const sourceConsumer = sourceConsumers.get(filename) as SourceMapConsumer;
-
       try {
-        return { ...frame, ...(await resolveSourceFrameFromS3(sourceConsumer, lineno, colno)) };
+        const { filename, lineno, colno } = frame;
+        if (!filename || !lineno || !colno) {
+          return frame; // Return the original frame if essential properties are missing
+        }
+
+        if (!sourceConsumers.has(filename)) {
+          const sourceConsumer = await getSourceConsumer(projectId, release, sanitizeFilePath(filename));
+          sourceConsumers.set(filename, sourceConsumer);
+        }
+
+        const sourceConsumer = sourceConsumers.get(filename) as SourceMapConsumer;
+        console.log('frame', { filename, lineno, colno }, sourceConsumers.has(filename));
+
+        const resolvedFrame = await resolveSourceFrame(sourceConsumer, lineno, colno);
+        return { ...frame, ...resolvedFrame };
       } catch (error) {
         console.error('Error resolving source frame:', error);
-        return frame as ResolvedFrame; // Return the original frame in case of an error
+        return frame; // Return the original frame in case of an error
       }
     }),
   );
@@ -71,7 +74,7 @@ function sanitizeFilePath(filePath: string): string {
 }
 
 async function getSourceConsumer(projectId: string, release: string, filePath: string): Promise<SourceMapConsumer> {
-  const mapKey = `source-maps/${projectId}/${release}/${sanitizeFilePath(filePath)}.map`;
+  const mapKey = `source-maps/${projectId}/${release}/${filePath}.map`;
 
   const s3 = await getS3Client();
   const config = useRuntimeConfig();
@@ -88,31 +91,32 @@ async function getSourceConsumer(projectId: string, release: string, filePath: s
   return await new SourceMapConsumer(mapContent);
 }
 
-export async function resolveSourceFrameFromS3(
-  consumer: SourceMapConsumer,
-  line: number,
-  column: number,
-): Promise<ResolvedFrame> {
+async function resolveSourceFrame(consumer: SourceMapConsumer, line: number, column: number): Promise<StackFrame> {
   const pos = consumer.originalPositionFor({ line, column });
 
-  let context: string[] | undefined;
+  let lines: string[] | undefined;
   try {
     const content = consumer.sourceContentFor(pos.source!);
     if (content) {
-      const lines = content.split('\n');
-      const start = Math.max(0, (pos.line || 1) - 3);
-      const end = (pos.line || 1) + 2;
-      context = lines.slice(start, end);
+      lines = content.split('\n');
     }
   } catch {
     // source content may be unavailable
   }
 
+  const lineNumber = pos.line ?? 0;
+  const previousPostLines = 3;
+
   return {
-    source: pos.source || undefined,
-    line: pos.line || undefined,
-    column: pos.column || undefined,
-    name: pos.name || undefined,
-    context,
-  };
+    filename: pos.source || undefined,
+    lineno: pos.line || undefined,
+    colno: pos.column || undefined,
+    function: pos.name || undefined,
+    pre_context: lines?.slice(Math.max(lineNumber - previousPostLines, 0), lineNumber - 1),
+    context_line: lines?.[lineNumber - 1],
+    post_context: lines?.slice(lineNumber, Math.min(lineNumber + previousPostLines)),
+    vars: {
+      resolved: true,
+    },
+  } satisfies StackFrame;
 }

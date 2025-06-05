@@ -28,15 +28,5 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const resolvedFrames = await resolveSourceFrames(project.id.toString(), release, frames);
-
-  return resolvedFrames
-    .filter((frame): frame is ResolvedFrame => frame !== undefined)
-    .map((frame) => ({
-      source: frame.source,
-      line: frame.line,
-      column: frame.column,
-      name: frame.name,
-      context: frame.context,
-    }));
+  return resolveSourceFrames(project.id.toString(), release, frames);
 });
