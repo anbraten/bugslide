@@ -171,7 +171,7 @@ export async function sendErrorMail(event: H3Event, project: Project, error: Cau
   const db = await useDb(event);
 
   const config = useRuntimeConfig(event);
-  const url = `${config.publicHost}/projects/${project.id}/errors/${error.id}`;
+  const url = `${config.public.host}/projects/${project.id}/errors/${error.id}`;
   const text = `
 An error just occurred in your project **${project.name}**:
 

@@ -17,7 +17,9 @@ export default defineNuxtConfig({
     },
   },
   runtimeConfig: {
-    publicHost: '',
+    public: {
+      host: '',
+    },
     auth: {
       password: '',
       clientId: '',
@@ -47,7 +49,9 @@ export default defineNuxtConfig({
   },
   $development: {
     runtimeConfig: {
-      publicHost: 'http://localhost:3000',
+      public: {
+        host: 'http://localhost:3000',
+      },
       auth: {
         password: 'a-32-plus-characters-long-password',
       },
