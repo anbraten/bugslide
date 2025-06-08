@@ -1,7 +1,6 @@
 import { parseEnvelope, forEachEnvelopeItem, Exception, EventItem, Event } from '@sentry/core';
 import { and, eq } from 'drizzle-orm';
 import type { H3Event } from 'h3';
-import { releasesTable } from '~/server/utils/db';
 import { createOrGetRelease } from '~/server/utils/releases';
 
 export default defineEventHandler(async (event) => {
