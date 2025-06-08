@@ -3,15 +3,6 @@ import { Readable } from 'node:stream';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { StackFrame } from '@sentry/core';
 
-interface ResolvedFrame {
-  filePath?: string;
-  source?: string;
-  line?: number;
-  column?: number;
-  name?: string;
-  context?: string[];
-}
-
 function streamToString(stream: Readable): Promise<string> {
   return new Promise((resolve, reject) => {
     const chunks: any[] = [];

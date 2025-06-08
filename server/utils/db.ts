@@ -74,6 +74,7 @@ export const errorEventsTable = sqliteTable('error_events', {
     .notNull(),
   createdAt: int({ mode: 'timestamp' }).notNull(),
   stacktrace: text({ mode: 'json' }).$type<Stacktrace>(),
+  release: text(),
   event: text({ mode: 'json' }).$type<Event>(),
 });
 
@@ -86,4 +87,13 @@ export const logsTable = sqliteTable('logs', {
   level: text().notNull().$type<'fatal' | 'error' | 'warning' | 'log' | 'info' | 'debug'>(),
   message: text().notNull(),
   metadata: text({ mode: 'json' }),
+});
+
+export const releasesTable = sqliteTable('releases', {
+  id: int().primaryKey({ autoIncrement: true }),
+  projectId: int()
+    .references(() => projectsTable.id)
+    .notNull(),
+  version: text().notNull(),
+  createdAt: int({ mode: 'timestamp' }).notNull(),
 });

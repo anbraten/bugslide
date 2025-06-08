@@ -1,14 +1,6 @@
 import { StackFrame } from '@sentry/core';
 import { resolveSourceFrames } from '~/server/utils/source-map';
 
-type ResolvedFrame = {
-  source: string;
-  line: number;
-  column: number;
-  name?: string;
-  context?: string[];
-};
-
 export default defineEventHandler(async (event) => {
   const project = await requireProject(event, getRouterParam(event, 'projectId'));
 

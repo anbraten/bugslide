@@ -1,6 +1,8 @@
 import { parseEnvelope, forEachEnvelopeItem, Exception, EventItem, Event } from '@sentry/core';
 import { and, eq } from 'drizzle-orm';
 import type { H3Event } from 'h3';
+import { releasesTable } from '~/server/utils/db';
+import { createOrGetRelease } from '~/server/utils/releases';
 
 export default defineEventHandler(async (event) => {
   setHeader(event, 'Access-Control-Allow-Origin', '*');
@@ -33,6 +35,8 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  // TODO: validate Sentry key and client
+
   const sentryEnvelope = await readBody(event);
 
   const envelope = parseEnvelope(sentryEnvelope);
@@ -47,7 +51,7 @@ export default defineEventHandler(async (event) => {
         console.log('Unsupported event item', item);
       }
     } else {
-      // console.log('Unsupported item type', itemType, item);
+      // console.warn('Unsupported item type', itemType, item);
     }
   });
 
@@ -153,12 +157,19 @@ async function saveError(event: H3Event, project: Project, exception: Exception,
     throw new Error('Failed to create error');
   }
 
+  const release = errorEvent.release;
+  // if we know the release, create it if not already existing
+  if (release) {
+    await createOrGetRelease(event, project, release);
+  }
+
   await db.insert(errorEventsTable).values({
     error: error.id,
     eventId: error.events,
     createdAt: new Date(),
     stacktrace: exception.stacktrace,
     event: errorEvent,
+    release,
   });
 }
 

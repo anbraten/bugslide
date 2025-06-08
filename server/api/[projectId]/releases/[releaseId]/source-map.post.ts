@@ -1,24 +1,20 @@
-import { StackFrame } from '@sentry/core';
-import { resolveSourceFrames } from '~/server/utils/source-map';
-
-type ResolvedFrame = {
-  source: string;
-  line: number;
-  column: number;
-  name?: string;
-  context?: string[];
-};
+import { createOrGetRelease } from '~/server/utils/releases';
 
 export default defineEventHandler(async (event) => {
   const project = await requireProject(event, getRouterParam(event, 'projectId'));
 
-  const release = getRouterParam(event, 'releaseId');
-  if (!release) {
+  const releaseId = getRouterParam(event, 'releaseId');
+  if (!releaseId) {
     throw createError({
       statusCode: 400,
       message: 'Release parameter is required.',
     });
   }
+
+  // create release on the fly if it does not exist
+  const release = await createOrGetRelease(event, project, releaseId);
+
+  const sourceMapPath = `source-maps/${project.id}/${release.id}/`;
 
   // TODO: allow to upload source maps
   throw createError({
