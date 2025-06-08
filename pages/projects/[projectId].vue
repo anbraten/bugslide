@@ -18,7 +18,14 @@
 const route = useRoute();
 
 const projectId = computed(() => route.params.projectId);
-const { data: project } = await useFetch(() => `/api/${projectId.value}`);
+const { data: project } = await useFetch(() => `/api/projects/${projectId.value}`);
+
+const { data: errors } = await useFetch(() => `/api/projects/${projectId.value}/errors`, {
+  query: {
+    state: 'open', // Default to open errors
+  },
+  default: () => [],
+});
 
 const links = computed(() => [
   {
@@ -26,7 +33,7 @@ const links = computed(() => [
     icon: 'i-lucide-flame',
     to: `/projects/${projectId.value}`,
     exact: true,
-    badge: 100,
+    badge: errors.value.length ?? 0,
   },
   {
     label: 'Releases',

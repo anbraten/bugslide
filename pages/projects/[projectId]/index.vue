@@ -63,7 +63,7 @@ const route = useRoute();
 
 const state = ref<'open' | 'resolved' | 'ignored'>('open');
 const projectId = computed(() => route.params.projectId);
-const { data: errors } = await useFetch(() => `/api/${projectId.value}/errors`, {
+const { data: errors } = await useFetch(() => `/api/projects/${projectId.value}/errors`, {
   query: computed(() => ({
     state: state.value,
   })),

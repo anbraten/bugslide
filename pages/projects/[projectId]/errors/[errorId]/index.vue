@@ -117,7 +117,7 @@ function isRelevantFrame(frame: any) {
 }
 
 const { data: _resolvedFrames } = await useFetch<StackFrame[]>(
-  () => `/api/${projectId.value}/releases/${release.value}/resolve-stack-frame`,
+  () => `/api/projects/${projectId.value}/releases/${release.value}/resolve-stack-frame`,
   {
     watch: [frames],
     method: 'POST',

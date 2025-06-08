@@ -17,9 +17,12 @@ import type { Project } from '~/server/utils/db';
 
 const route = useRoute();
 
-const { data: project } = await useFetch<Project>(`/api/${route.params.projectId as string}`);
+const { data: project } = await useFetch<Project>(`/api/projects/${route.params.projectId as string}`);
 
 const dsn = computed(
-  () => `${window?.location?.protocol}//${project.value?.publicSecret ?? ''}@${window?.location?.host}/${route.params.projectId}`,
+  () =>
+    `${window?.location?.protocol}//${project.value?.publicSecret ?? ''}@${window?.location?.host}/${
+      route.params.projectId
+    }`,
 );
 </script>

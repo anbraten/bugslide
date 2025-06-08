@@ -149,11 +149,13 @@ const route = useRoute();
 
 const projectId = computed(() => route.params.projectId as string);
 const errorId = computed(() => route.params.errorId as string);
-const { data: error, refresh: refreshError } = await useFetch(() => `/api/${projectId.value}/errors/${errorId.value}`);
+const { data: error, refresh: refreshError } = await useFetch(
+  () => `/api/projects/${projectId.value}/errors/${errorId.value}`,
+);
 
 const errorEventId = ref(1);
 const { data: errorEvent } = await useFetch(
-  () => `/api/${projectId.value}/errors/${errorId.value}/events/${errorEventId.value}`,
+  () => `/api/projects/${projectId.value}/errors/${errorId.value}/events/${errorEventId.value}`,
 );
 
 useSeoMeta({
@@ -195,7 +197,7 @@ const userAgent = computed(() => {
 });
 
 async function changeState(state: 'open' | 'resolved' | 'ignored') {
-  await fetch(`/api/${projectId.value}/errors/${errorId.value}`, {
+  await fetch(`/api/projects/${projectId.value}/errors/${errorId.value}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
