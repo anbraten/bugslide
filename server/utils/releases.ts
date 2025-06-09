@@ -24,7 +24,6 @@ export async function createOrGetRelease(event: H3Event, project: Project, relea
       version: release,
       createdAt: new Date(),
     })
-    .onConflictDoNothing({ target: [releasesTable.projectId, releasesTable.version] })
     .returning();
 
   return res?.[0];
