@@ -1,0 +1,1 @@
+ALTER TABLE `user_projects` ADD `token` text;

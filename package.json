@@ -14,7 +14,9 @@
     "db:ui": "pnpm drizzle-kit studio"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.823.0",
+    "@aws-sdk/client-s3": "^3.826.0",
+    "@aws-sdk/lib-storage": "^3.826.0",
+    "@fastify/busboy": "^3.1.1",
     "@libsql/client": "^0.15.8",
     "@nuxt/ui": "2.18.7",
     "@sentry/core": "^9.26.0",
@@ -22,11 +24,13 @@
     "nodemailer": "6.9.16",
     "nuxt": "3.14.0",
     "source-map": "^0.7.4",
-    "ua-parser-js": "^2.0.3"
+    "ua-parser-js": "^2.0.3",
+    "yauzl": "^3.2.0"
   },
   "devDependencies": {
     "@types/nodemailer": "6.4.16",
     "@types/ua-parser-js": "^0.7.39",
+    "@types/yauzl": "^2.10.3",
     "dotenv": "^16.5.0",
     "drizzle-kit": "^0.31.1"
   }

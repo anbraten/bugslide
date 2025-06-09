@@ -49,6 +49,7 @@ export const userProjectsTable = sqliteTable('user_projects', {
   projectId: int()
     .references(() => projectsTable.id)
     .notNull(),
+  token: text(),
 });
 
 export const errorsTable = sqliteTable('errors', {

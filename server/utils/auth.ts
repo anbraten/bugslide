@@ -72,3 +72,31 @@ export async function requireProject(event: H3Event, projectId: number | string 
 
   return project;
 }
+
+export async function requireProjectByToken(event: H3Event) {
+  const token = getHeader(event, 'Authorization')?.replace('Bearer ', '');
+  if (!token) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Unauthorized',
+    });
+  }
+
+  const db = await useDb(event);
+
+  const res = await db
+    .select()
+    .from(projectsTable)
+    .innerJoin(userProjectsTable, eq(projectsTable.id, userProjectsTable.projectId))
+    .where(eq(userProjectsTable.token, token))
+    .get();
+
+  if (!res) {
+    throw createError({
+      statusCode: 404,
+      message: 'Project not found',
+    });
+  }
+
+  return res.projects;
+}

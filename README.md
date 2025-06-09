@@ -51,13 +51,15 @@ Sentry.captureMessage('Hello, world!');
   - [ ] Delete project
   - [x] Only return projects that user is assigned to
   - [ ] Assign user to project
+  - [ ] Set / show user project api token
 - [x] Source maps
-  - [ ] Upload source maps
+  - [x] Upload source maps
   - [x] Show stack trace with source maps
+  - [ ] Retention policy for source maps (last event with source map)
 - [x] Add button to resolve, reopen, ignore errors
 - [ ] Allow to delete errors
 - [x] Releases
-  - [ ] Automatically create release when first event is received
+  - [x] Automatically create release when first event is received
   - [ ] Link to open release in forge
 - [ ] Environment
   - [ ] Automatically create environment when first event is received
