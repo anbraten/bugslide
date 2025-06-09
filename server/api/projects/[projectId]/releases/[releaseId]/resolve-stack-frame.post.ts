@@ -20,5 +20,5 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  return resolveSourceFrames(project.id.toString(), release, frames);
+  return resolveSourceFrames(event, project.id.toString(), release, frames);
 });

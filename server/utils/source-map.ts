@@ -1,7 +1,10 @@
+import { H3Event } from 'h3';
 import { SourceMapConsumer } from 'source-map';
 import { Readable } from 'node:stream';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { StackFrame } from '@sentry/core';
+import { and, eq, inArray } from 'drizzle-orm';
+import { artifactBundleFilesTable } from './db';
 
 function streamToString(stream: Readable): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -12,11 +15,12 @@ function streamToString(stream: Readable): Promise<string> {
   });
 }
 
-export async function resolveSourceFrames(projectId: string, release: string, frames: StackFrame[]) {
+export async function resolveSourceFrames(event: H3Event, projectId: string, release: string, frames: StackFrame[]) {
   const s3Client = await getS3Client();
-  const sourceMapResolver = new SourceMapResolver({ s3Client, release, projectId });
+  const db = await useDb(event);
+  const sourceMapResolver = new SourceMapResolver({ s3Client, db, release, projectId });
 
-  await Promise.all(frames.map(async (frame) => sourceMapResolver.loadSourceConsumerByFrame(frame).catch(() => {})));
+  await sourceMapResolver.loadSourceConsumerFromFrames(frames);
 
   const resolvedFrames: (StackFrame | undefined)[] = await Promise.all(
     frames.map(async (frame) => {
@@ -47,12 +51,24 @@ export async function resolveSourceFrames(projectId: string, release: string, fr
 
 class SourceMapResolver {
   s3Client: S3Client;
+  db: ReturnType<typeof useDb>;
   sourceConsumers: Map<string, SourceMapConsumer> = new Map();
   projectId: string;
   release: string;
 
-  constructor({ s3Client, projectId, release }: { s3Client: S3Client; projectId: string; release: string }) {
+  constructor({
+    s3Client,
+    db,
+    projectId,
+    release,
+  }: {
+    s3Client: S3Client;
+    db: ReturnType<typeof useDb>;
+    projectId: string;
+    release: string;
+  }) {
     this.s3Client = s3Client;
+    this.db = db;
     this.projectId = projectId;
     this.release = release;
   }
@@ -72,63 +88,69 @@ class SourceMapResolver {
     return null;
   }
 
-  async loadSourceConsumerByFrame(frame: StackFrame): Promise<void> {
-    const { filename, debug_id } = frame;
+  async loadSourceConsumerFromFrames(frames: StackFrame[]): Promise<void> {
+    const debugIds = new Set<string>(frames.map((frame) => frame.debug_id as string).filter(Boolean));
+    const debugIdFiles = new Map<string, string>();
 
-    const existingConsumer = this.getSourceConsumerByFrame(frame);
-    if (existingConsumer) {
-      return;
+    const response = await this.db
+      .select()
+      .from(artifactBundleFilesTable)
+      .where(
+        and(
+          eq(artifactBundleFilesTable.projectId, parseInt(this.projectId, 10)),
+          inArray(artifactBundleFilesTable.debugId, Array.from(debugIds)),
+        ),
+      );
+
+    for (const artifactBundleFile of response) {
+      if (!artifactBundleFile.debugId) {
+        continue;
+      }
+      const s3Key = `projects/${this.projectId}/artifact_bundles/${artifactBundleFile.checksum}/${artifactBundleFile.filePath}`;
+      debugIdFiles.set(artifactBundleFile.debugId, s3Key);
     }
 
-    // try with debug-id first
-    if (debug_id) {
-      const sourceConsumer = await this.getSourceConsumerByDebugID(debug_id);
-      this.sourceConsumers.set(`debug-${debug_id}`, sourceConsumer);
-      return;
-    }
+    for await (const frame of frames) {
+      const { filename, debug_id } = frame;
 
-    if (filename) {
-      const sourceConsumer = await this.getSourceConsumerByPath(filename);
-      this.sourceConsumers.set(`file-${filename}`, sourceConsumer);
-      return;
-    }
+      const existingConsumer = this.getSourceConsumerByFrame(frame);
+      if (existingConsumer) {
+        continue;
+      }
 
-    return;
+      // try with debug-id first
+      if (debug_id && debugIdFiles.has(debug_id)) {
+        const mapKey = debugIdFiles.get(debug_id);
+        if (!mapKey) {
+          continue;
+        }
+        const sourceConsumer = await this.getSourceConsumerByPath(mapKey);
+        this.sourceConsumers.set(`debug-${debug_id}`, sourceConsumer);
+        continue;
+      }
+
+      if (filename) {
+        const mapKey = `projects/${this.projectId}/source_maps/${this.release}/${sanitizeFilePath(filename)}.map`;
+        const sourceConsumer = await this.getSourceConsumerByPath(mapKey);
+        this.sourceConsumers.set(`file-${filename}`, sourceConsumer);
+        continue;
+      }
+    }
   }
 
   async cleanup() {
-    // Clean up the consumers after use
     for (const sourceConsumer of this.sourceConsumers.values()) {
       sourceConsumer.destroy();
     }
   }
 
   async getSourceConsumerByPath(filePath: string): Promise<SourceMapConsumer> {
-    const mapKey = `projects/${this.projectId}/source_maps/${this.release}/${sanitizeFilePath(filePath)}.map`;
-
     const config = useRuntimeConfig();
 
     const object = await this.s3Client.send(
       new GetObjectCommand({
         Bucket: config.s3.bucket,
-        Key: mapKey,
-      }),
-    );
-
-    const mapContent = await streamToString(object.Body as Readable);
-
-    return await new SourceMapConsumer(mapContent);
-  }
-
-  async getSourceConsumerByDebugID(debugId: string): Promise<SourceMapConsumer> {
-    const mapKey = `projects/${this.projectId}/artifact_bundles/${debugId}.js.map`; // TODO: we probably need to query db here
-
-    const config = useRuntimeConfig();
-
-    const object = await this.s3Client.send(
-      new GetObjectCommand({
-        Bucket: config.s3.bucket,
-        Key: mapKey,
+        Key: filePath,
       }),
     );
 

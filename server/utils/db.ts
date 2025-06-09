@@ -98,3 +98,18 @@ export const releasesTable = sqliteTable('releases', {
   version: text().notNull(),
   createdAt: int({ mode: 'timestamp' }).notNull(),
 });
+
+export const artifactBundleFilesTable = sqliteTable('artifact_bundle_files', {
+  id: int().primaryKey({ autoIncrement: true }),
+  projectId: int()
+    .references(() => projectsTable.id)
+    .notNull(),
+  releaseId: int().references(() => releasesTable.id),
+  type: text().notNull(),
+  filePath: text().notNull(),
+  debugId: text(),
+  checksum: text(),
+  data: text({ mode: 'json' }),
+  createdAt: int({ mode: 'timestamp' }).notNull(),
+});
+export type ArtifactBundleFile = InferSelectModel<typeof artifactBundleFilesTable>;

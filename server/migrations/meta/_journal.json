@@ -43,6 +43,13 @@
       "when": 1749410594169,
       "tag": "0005_tan_red_ghost",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1749479242988,
+      "tag": "0006_sleepy_arclight",
+      "breakpoints": true
     }
   ]
 }

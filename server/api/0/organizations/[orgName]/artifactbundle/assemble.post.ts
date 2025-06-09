@@ -11,6 +11,7 @@ import { createGunzip } from 'zlib';
 import { pipeline } from 'node:stream/promises';
 import { PassThrough } from 'node:stream';
 import yauzl, { Entry } from 'yauzl';
+import { ArtifactBundleFile, artifactBundleFilesTable } from '~/server/utils/db';
 
 export default defineEventHandler(async (event) => {
   const project = await requireProjectByToken(event);
@@ -53,7 +54,8 @@ export default defineEventHandler(async (event) => {
   }
 
   if (chunks.length > 0) {
-    const assembler = new ArtifactBundleAssembler(s3, config.s3.bucket);
+    const db = await useDb(event);
+    const assembler = new ArtifactBundleAssembler(s3, config.s3.bucket, db);
     await assembler.assembleArtifactBundleStream(project.id.toString(), body.checksum, chunks);
   }
 
@@ -65,11 +67,13 @@ export default defineEventHandler(async (event) => {
 
 class ArtifactBundleAssembler {
   s3Client: S3Client;
+  db: ReturnType<typeof useDb>;
   bucketName: string;
 
-  constructor(s3Client: S3Client, bucketName: string) {
+  constructor(s3Client: S3Client, bucketName: string, db: ReturnType<typeof useDb>) {
     this.s3Client = s3Client;
     this.bucketName = bucketName;
+    this.db = db;
   }
 
   /**
@@ -183,20 +187,23 @@ class ArtifactBundleAssembler {
           throw new Error('Failed to parse manifest.json from artifact bundle' + e);
         }
 
-        for await (const [fileName, fileData] of Object.entries(manifest.files)) {
+        const artifactBundleFiles: (typeof artifactBundleFilesTable.$inferInsert)[] = [];
+        for (const [filePath, fileData] of Object.entries(manifest.files)) {
           if (fileData.type === 'source_map' || fileData.type === 'minified_source') {
             const debugId = fileData.headers['debug-id'];
-            const fileMap = {
-              fileName,
+            artifactBundleFiles.push({
+              projectId: parseInt(projectId, 10),
+              filePath,
               debugId,
               type: fileData.type,
               data: fileData,
-            };
-            // TODO: save debug-id to file mappings to database
-
-            console.log(`\tFound file in manifest: ${fileName} with debug-id: ${debugId}`);
+              checksum,
+              createdAt: new Date(),
+            });
           }
         }
+
+        await this.db.insert(artifactBundleFilesTable).values(artifactBundleFiles);
 
         const upload = new Upload({
           client: this.s3Client,
