@@ -16,7 +16,7 @@ export async function resolveSourceFrames(projectId: string, release: string, fr
   const s3Client = await getS3Client();
   const sourceMapResolver = new SourceMapResolver({ s3Client, release, projectId });
 
-  await Promise.all(frames.map(async (frame) => sourceMapResolver.loadSourceConsumerByFrame(frame)));
+  await Promise.all(frames.map(async (frame) => sourceMapResolver.loadSourceConsumerByFrame(frame).catch(() => {})));
 
   const resolvedFrames: (StackFrame | undefined)[] = await Promise.all(
     frames.map(async (frame) => {
@@ -72,28 +72,28 @@ class SourceMapResolver {
     return null;
   }
 
-  async loadSourceConsumerByFrame(frame: StackFrame): Promise<SourceMapConsumer | null> {
+  async loadSourceConsumerByFrame(frame: StackFrame): Promise<void> {
     const { filename, debug_id } = frame;
 
     const existingConsumer = this.getSourceConsumerByFrame(frame);
     if (existingConsumer) {
-      return existingConsumer;
+      return;
     }
 
     // try with debug-id first
     if (debug_id) {
       const sourceConsumer = await this.getSourceConsumerByDebugID(debug_id);
       this.sourceConsumers.set(`debug-${debug_id}`, sourceConsumer);
-      return sourceConsumer;
+      return;
     }
 
     if (filename) {
       const sourceConsumer = await this.getSourceConsumerByPath(filename);
       this.sourceConsumers.set(`file-${filename}`, sourceConsumer);
-      return sourceConsumer;
+      return;
     }
 
-    return null;
+    return;
   }
 
   async cleanup() {
