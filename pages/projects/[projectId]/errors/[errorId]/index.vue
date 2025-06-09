@@ -109,8 +109,28 @@ function sanitizeStacktracePath(path: string) {
   );
 }
 
+const debugIdsForFiles = computed(() => {
+  const debugIds = new Map<string, string>();
+
+  props.errorEvent.event.debug_meta?.images?.forEach((image) => {
+    if (image.type === 'sourcemap') {
+      debugIds.set(image.code_file, image.debug_id);
+    }
+  });
+
+  return debugIds;
+});
+
 const showOnlyRelevantFrames = ref(true);
-const frames = computed(() => props.errorEvent.stacktrace?.frames ?? []);
+const frames = computed(() =>
+  (props.errorEvent.stacktrace?.frames ?? []).map((frame) => {
+    const debugId = debugIdsForFiles.value.get(frame.filename ?? '');
+    return {
+      ...frame,
+      debug_id: debugId,
+    };
+  }),
+);
 
 function isRelevantFrame(frame: any) {
   return !frame.filename?.includes('node_modules/');
