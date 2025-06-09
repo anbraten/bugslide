@@ -24,23 +24,18 @@ export async function resolveSourceFrames(event: H3Event, projectId: string, rel
 
   const resolvedFrames: (StackFrame | undefined)[] = await Promise.all(
     frames.map(async (frame) => {
-      try {
-        const { lineno, colno } = frame;
-        if (!lineno || !colno) {
-          return frame; // Return the original frame if essential properties are missing
-        }
-
-        const sourceConsumer = sourceMapResolver.getSourceConsumerByFrame(frame);
-        if (!sourceConsumer) {
-          return frame; // Return the original frame if no source consumer is found
-        }
-
-        const resolvedFrame = await sourceMapResolver.resolveSourceFrame(sourceConsumer, lineno, colno);
-        return { ...frame, ...resolvedFrame };
-      } catch (error) {
-        // console.error('Error resolving source frame:', error);
-        return frame; // Return the original frame in case of an error
+      const { lineno, colno } = frame;
+      if (!lineno || !colno) {
+        return frame; // Return the original frame if essential properties are missing
       }
+
+      const sourceConsumer = sourceMapResolver.getSourceConsumerByFrame(frame);
+      if (!sourceConsumer) {
+        return frame; // Return the original frame if no source consumer is found
+      }
+
+      const resolvedFrame = await sourceMapResolver.resolveSourceFrame(sourceConsumer, lineno, colno);
+      return { ...frame, ...resolvedFrame };
     }),
   );
 
@@ -118,22 +113,26 @@ class SourceMapResolver {
         continue;
       }
 
-      // try with debug-id first
-      if (debug_id && debugIdFiles.has(debug_id)) {
-        const mapKey = debugIdFiles.get(debug_id);
-        if (!mapKey) {
+      try {
+        // try with debug-id first
+        if (debug_id && debugIdFiles.has(debug_id)) {
+          const mapKey = debugIdFiles.get(debug_id);
+          if (!mapKey) {
+            continue;
+          }
+          const sourceConsumer = await this.getSourceConsumerByPath(mapKey);
+          this.sourceConsumers.set(`debug-${debug_id}`, sourceConsumer);
           continue;
         }
-        const sourceConsumer = await this.getSourceConsumerByPath(mapKey);
-        this.sourceConsumers.set(`debug-${debug_id}`, sourceConsumer);
-        continue;
-      }
 
-      if (filename) {
-        const mapKey = `projects/${this.projectId}/source_maps/${this.release}/${sanitizeFilePath(filename)}.map`;
-        const sourceConsumer = await this.getSourceConsumerByPath(mapKey);
-        this.sourceConsumers.set(`file-${filename}`, sourceConsumer);
-        continue;
+        if (filename) {
+          const mapKey = `projects/${this.projectId}/source_maps/${this.release}/${sanitizeFilePath(filename)}.map`;
+          const sourceConsumer = await this.getSourceConsumerByPath(mapKey);
+          this.sourceConsumers.set(`file-${filename}`, sourceConsumer);
+          continue;
+        }
+      } catch (error) {
+        continue; // Ignore errors. Probably the source map is not available.
       }
     }
   }
