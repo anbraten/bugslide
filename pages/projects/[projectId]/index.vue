@@ -14,7 +14,8 @@
                 <USelect v-model="state" :options="['open', 'resolved', 'ignored']" />
               </div>
             </th>
-            <th>Events</th>
+            <th>Last</th>
+            <th>Count</th>
           </tr>
         </thead>
 
@@ -34,9 +35,12 @@
 
                 <div class="flex gap-4 mt-2">
                   <ErrorState :error />
-                  <span>{{ timeAgo(error.lastOccurrence) }} ago | {{ timeAgo(error.createdAt) }} old</span>
+                  <span>{{ timeAgo(error.createdAt) }} old</span>
                 </div>
               </div>
+            </td>
+            <td class="text-center">
+              <span>{{ timeAgo(error.lastOccurrence) }}</span>
             </td>
             <td class="text-center">
               <span>{{ error.events }}</span>
