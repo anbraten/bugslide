@@ -73,13 +73,19 @@
           </div>
           <div class="px-5 py-3">
             <p class="text-xs font-medium text-slate-500 dark:text-zinc-400 uppercase tracking-wide">Last seen</p>
-            <p class="mt-0.5 text-lg font-semibold text-slate-900 dark:text-zinc-100">
-              {{ timeAgo(error.lastOccurrence) }}
-            </p>
+            <UTooltip :text="formatAbsolute(error.lastOccurrence)">
+              <p class="mt-0.5 text-lg font-semibold text-slate-900 dark:text-zinc-100 cursor-default">
+                {{ timeAgo(error.lastOccurrence) }} ago
+              </p>
+            </UTooltip>
           </div>
           <div class="px-5 py-3">
             <p class="text-xs font-medium text-slate-500 dark:text-zinc-400 uppercase tracking-wide">First seen</p>
-            <p class="mt-0.5 text-lg font-semibold text-slate-900 dark:text-zinc-100">{{ timeAgo(error.createdAt) }}</p>
+            <UTooltip :text="formatAbsolute(error.createdAt)">
+              <p class="mt-0.5 text-lg font-semibold text-slate-900 dark:text-zinc-100 cursor-default">
+                {{ timeAgo(error.createdAt) }} ago
+              </p>
+            </UTooltip>
           </div>
         </div>
 
@@ -154,7 +160,9 @@
             class="grid grid-cols-[10rem_1fr] px-5 py-2.5 hover:bg-slate-50 dark:hover:bg-zinc-800/40"
           >
             <span class="text-sm font-medium text-slate-500 dark:text-zinc-400">Environment</span>
-            <UBadge color="blue" variant="subtle" size="xs">{{ errorEvent.event.environment }}</UBadge>
+            <div>
+              <UBadge color="blue" variant="subtle" size="xs">{{ errorEvent.event.environment }}</UBadge>
+            </div>
           </div>
           <div
             v-if="errorEvent.event.release"
@@ -273,12 +281,24 @@ const userAgent = computed(() => {
   return { browser: ua.getBrowser(), os: ua.getOS() };
 });
 
+const { add: addToast } = useToast();
+
 async function changeState(state: 'open' | 'resolved' | 'ignored') {
-  await fetch(`/api/projects/${projectId.value}/errors/${errorId.value}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ state }),
-  });
-  await refreshError();
+  try {
+    await fetch(`/api/projects/${projectId.value}/errors/${errorId.value}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ state }),
+    });
+    await refreshError();
+    const messages = {
+      resolved: { title: 'Error resolved', color: 'green' as const },
+      ignored: { title: 'Error ignored', color: 'gray' as const },
+      open: { title: 'Error reopened', color: 'orange' as const },
+    };
+    addToast(messages[state]);
+  } catch {
+    addToast({ title: 'Something went wrong', description: 'Failed to update error state.', color: 'red' });
+  }
 }
 </script>

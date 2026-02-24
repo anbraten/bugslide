@@ -1,3 +1,13 @@
+export function formatAbsolute(date: string | number) {
+  return new Date(date).toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 export function timeAgo(date: string) {
   const diff = (Date.now() - new Date(date).getTime()) / 1000;
 

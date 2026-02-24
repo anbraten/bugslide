@@ -145,14 +145,18 @@
           </div>
           <p class="mt-0.5 text-base text-slate-500 dark:text-zinc-400 line-clamp-1">{{ error.value }}</p>
           <div class="flex items-center gap-3 mt-2 flex-wrap">
-            <span class="text-sm text-slate-400 dark:text-zinc-500 flex items-center gap-1.5">
-              <Icon name="i-lucide-clock" class="w-4 h-4" />
-              First seen {{ timeAgo(error.createdAt) }} ago
-            </span>
-            <span class="text-sm text-slate-400 dark:text-zinc-500 flex items-center gap-1.5">
-              <Icon name="i-lucide-refresh-cw" class="w-4 h-4" />
-              Last seen {{ timeAgo(error.lastOccurrence) }} ago
-            </span>
+            <UTooltip :text="formatAbsolute(error.createdAt)">
+              <span class="text-sm text-slate-400 dark:text-zinc-500 flex items-center gap-1.5 cursor-default">
+                <Icon name="i-lucide-clock" class="w-4 h-4" />
+                First seen {{ timeAgo(error.createdAt) }} ago
+              </span>
+            </UTooltip>
+            <UTooltip :text="formatAbsolute(error.lastOccurrence)">
+              <span class="text-sm text-slate-400 dark:text-zinc-500 flex items-center gap-1.5 cursor-default">
+                <Icon name="i-lucide-refresh-cw" class="w-4 h-4" />
+                Last seen {{ timeAgo(error.lastOccurrence) }} ago
+              </span>
+            </UTooltip>
           </div>
         </div>
 

@@ -46,7 +46,11 @@
                 {{ release.version }}
               </router-link>
             </td>
-            <td class="p-3 text-sm text-slate-500 dark:text-zinc-400">{{ timeAgo(release.createdAt) }} ago</td>
+            <td class="p-3 text-sm text-slate-500 dark:text-zinc-400">
+              <UTooltip :text="formatAbsolute(release.createdAt)">
+                <span class="cursor-default">{{ timeAgo(release.createdAt) }} ago</span>
+              </UTooltip>
+            </td>
           </tr>
         </tbody>
       </table>

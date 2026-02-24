@@ -2,6 +2,7 @@ type ToastOptions = {
   title: string;
   description?: string;
   duration?: number;
+  color?: 'green' | 'red' | 'orange' | 'gray';
 };
 
 type Toast = ToastOptions & {
