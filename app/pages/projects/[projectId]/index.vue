@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col gap-4">
-    <!-- Toolbar: status tabs + search -->
+    <!-- Toolbar: status tabs + sort + search -->
     <div class="flex flex-col sm:flex-row sm:items-center gap-3">
       <!-- Status tabs -->
       <div class="flex items-center gap-1 bg-slate-100 dark:bg-zinc-800 rounded-lg p-1">
@@ -27,6 +27,24 @@
         </button>
       </div>
 
+      <!-- Sort -->
+      <div class="flex items-center gap-1 bg-slate-100 dark:bg-zinc-800 rounded-lg p-1">
+        <button
+          v-for="s in sortOptions"
+          :key="s.value"
+          class="flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+          :class="
+            sort === s.value
+              ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-zinc-100 shadow-sm'
+              : 'text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-200'
+          "
+          @click="sort = s.value"
+        >
+          <Icon :name="s.icon" class="w-4 h-4" />
+          {{ s.label }}
+        </button>
+      </div>
+
       <!-- Search -->
       <div class="relative sm:ml-auto w-full sm:w-64">
         <Icon
@@ -42,17 +60,22 @@
       </div>
     </div>
 
-    <!-- Count -->
-    <p class="text-sm text-slate-500 dark:text-zinc-400 -mt-1">
-      {{ filteredErrors.length }} {{ state }} error{{ filteredErrors.length !== 1 ? 's' : '' }}
-      <span v-if="search">
-        matching <em class="not-italic font-medium text-slate-700 dark:text-zinc-300">"{{ search }}"</em></span
-      >
-    </p>
+    <!-- Count + pagination info -->
+    <div class="flex items-center justify-between -mt-1">
+      <p class="text-sm text-slate-500 dark:text-zinc-400">
+        {{ response?.total ?? 0 }} {{ state }} error{{ (response?.total ?? 0) !== 1 ? 's' : '' }}
+        <span v-if="search">
+          matching <em class="not-italic font-medium text-slate-700 dark:text-zinc-300">"{{ search }}"</em></span
+        >
+      </p>
+      <p v-if="(response?.pages ?? 0) > 1" class="text-sm text-slate-400 dark:text-zinc-500">
+        Page {{ response?.page }} of {{ response?.pages }}
+      </p>
+    </div>
 
     <!-- Empty state -->
     <div
-      v-if="filteredErrors.length === 0"
+      v-if="errors.length === 0"
       class="flex flex-col items-center justify-center py-20 text-center bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl"
     >
       <div
@@ -94,7 +117,7 @@
       class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden divide-y divide-slate-100 dark:divide-zinc-800"
     >
       <NuxtLink
-        v-for="error in filteredErrors"
+        v-for="error in errors"
         :key="error.id"
         :to="`/projects/${projectId}/errors/${error.id}`"
         class="group flex items-start gap-4 px-5 py-5 hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-500"
@@ -148,6 +171,46 @@
         />
       </NuxtLink>
     </div>
+
+    <!-- Pagination -->
+    <div v-if="(response?.pages ?? 0) > 1" class="flex items-center justify-between gap-2">
+      <UButton
+        icon="i-lucide-chevron-left"
+        label="Previous"
+        color="gray"
+        variant="outline"
+        size="sm"
+        :disabled="page === 1"
+        @click="page--"
+      />
+
+      <div class="flex items-center gap-1">
+        <button
+          v-for="p in response.pages"
+          :key="p"
+          class="w-9 h-9 rounded-lg text-sm font-medium transition-colors"
+          :class="
+            p === page
+              ? 'bg-orange-500 text-white'
+              : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800'
+          "
+          @click="page = p"
+        >
+          {{ p }}
+        </button>
+      </div>
+
+      <UButton
+        label="Next"
+        icon="i-lucide-chevron-right"
+        icon-position="right"
+        color="gray"
+        variant="outline"
+        size="sm"
+        :disabled="page === response.pages"
+        @click="page++"
+      />
+    </div>
   </div>
 </template>
 
@@ -155,7 +218,11 @@
 const route = useRoute();
 
 const state = ref<'open' | 'resolved' | 'ignored'>('open');
+const sort = ref<'lastSeen' | 'firstSeen' | 'events'>('lastSeen');
 const search = ref('');
+const debouncedSearch = ref('');
+const page = ref(1);
+const LIMIT = 20;
 const projectId = computed(() => route.params.projectId);
 
 const tabs = [
@@ -164,15 +231,37 @@ const tabs = [
   { label: 'Ignored', value: 'ignored' as const },
 ];
 
-const { data: errors } = await useFetch(() => `/api/projects/${projectId.value}/errors`, {
-  query: computed(() => ({ state: state.value })),
-  default: () => [],
-  watch: [state],
+const sortOptions = [
+  { label: 'Last seen', value: 'lastSeen' as const, icon: 'i-lucide-clock' },
+  { label: 'First seen', value: 'firstSeen' as const, icon: 'i-lucide-calendar' },
+  { label: 'Events', value: 'events' as const, icon: 'i-lucide-bar-chart-2' },
+];
+
+// Debounce search so we don't hit the API on every keystroke
+let searchTimer: ReturnType<typeof setTimeout>;
+watch(search, (val) => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    debouncedSearch.value = val;
+  }, 300);
 });
 
-const filteredErrors = computed(() => {
-  if (!search.value.trim()) return errors.value;
-  const q = search.value.toLowerCase();
-  return errors.value.filter((e: any) => e.title?.toLowerCase().includes(q) || e.value?.toLowerCase().includes(q));
+// Reset to page 1 when filters change
+watch([state, sort, debouncedSearch], () => {
+  page.value = 1;
 });
+
+const { data: response } = await useFetch(() => `/api/projects/${projectId.value}/errors`, {
+  query: computed(() => ({
+    state: state.value,
+    sort: sort.value,
+    search: debouncedSearch.value || undefined,
+    page: page.value,
+    limit: LIMIT,
+  })),
+  default: () => ({ items: [], total: 0, page: 1, limit: LIMIT, pages: 0 }),
+  watch: [state, sort, debouncedSearch, page],
+});
+
+const errors = computed(() => response.value?.items ?? []);
 </script>

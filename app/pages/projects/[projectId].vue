@@ -29,8 +29,9 @@ const { data: project } = await useFetch(() => `/api/projects/${projectId.value}
 const { data: errors } = await useFetch(() => `/api/projects/${projectId.value}/errors`, {
   query: {
     state: 'open',
+    limit: 1,
   },
-  default: () => [],
+  default: () => ({ total: 0 }),
 });
 
 const links = computed(() => [
@@ -39,7 +40,7 @@ const links = computed(() => [
     icon: 'i-lucide-flame',
     to: `/projects/${projectId.value}`,
     exact: true,
-    badge: errors.value.length ?? 0,
+    badge: errors.value?.total ?? 0,
   },
   {
     label: 'Releases',
