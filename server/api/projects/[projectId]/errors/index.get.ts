@@ -1,5 +1,5 @@
 import { and, desc, eq } from 'drizzle-orm';
-import { requireProject } from '~/server/utils/auth';
+import { requireProject } from '#server/utils/auth';
 
 export default defineEventHandler(async (event) => {
   const db = await useDb(event);

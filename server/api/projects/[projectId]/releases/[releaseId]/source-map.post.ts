@@ -1,4 +1,4 @@
-import { createOrGetRelease } from '~/server/utils/releases';
+import { createOrGetRelease } from '#server/utils/releases';
 
 export default defineEventHandler(async (event) => {
   const project = await requireProject(event, getRouterParam(event, 'projectId'));

@@ -11,7 +11,7 @@ import { createGunzip } from 'zlib';
 import { pipeline } from 'node:stream/promises';
 import { PassThrough } from 'node:stream';
 import yauzl, { Entry } from 'yauzl';
-import { ArtifactBundleFile, artifactBundleFilesTable } from '~/server/utils/db';
+import { ArtifactBundleFile, artifactBundleFilesTable } from '#server/utils/db';
 
 export default defineEventHandler(async (event) => {
   const project = await requireProjectByToken(event);

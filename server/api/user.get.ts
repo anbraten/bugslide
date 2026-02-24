@@ -1,3 +1,6 @@
 export default defineEventHandler(async (event) => {
-  return (await getUser(event)) ?? null;
+  const user = await getUser(event);
+  return {
+    user: user ?? null,
+  };
 });

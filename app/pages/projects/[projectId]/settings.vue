@@ -13,7 +13,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Project } from '~/server/utils/db';
+import type { Project } from '#server/utils/db';
 
 const route = useRoute();
 
