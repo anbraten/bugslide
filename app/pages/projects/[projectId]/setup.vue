@@ -1,9 +1,24 @@
 <template>
-  <UCard>
-    <h2 class="text-xl">Setup</h2>
+  <div>
+    <UCard>
+      <template #header>
+        <div class="flex items-center gap-2">
+          <Icon name="i-lucide-book-open" class="w-4 h-4 text-slate-500 dark:text-zinc-400" />
+          <h2 class="text-base font-semibold text-slate-900 dark:text-zinc-100">SDK Setup Guide</h2>
+        </div>
+      </template>
 
-    <pre class="border dark:border-gray-800 rounded-md p-2 bg-gray-200 dark:bg-gray-800 mt-4">{{ setupCode }}</pre>
-  </UCard>
+      <div>
+        <p class="text-sm text-slate-500 dark:text-zinc-400 mb-4">
+          Add the following to your application to start capturing errors:
+        </p>
+        <pre
+          class="block text-xs bg-zinc-950 dark:bg-black text-zinc-100 rounded-xl p-4 overflow-x-auto font-mono leading-relaxed"
+          >{{ setupCode }}</pre
+        >
+      </div>
+    </UCard>
+  </div>
 </template>
 
 <script lang="ts" setup>

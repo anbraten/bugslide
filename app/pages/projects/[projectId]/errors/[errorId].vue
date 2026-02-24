@@ -1,144 +1,226 @@
 <template>
   <div>
-    <UButton :to="`/projects/${projectId}`" icon="i-mdi-arrow-left" label="Back" color="gray" class="mb-4" />
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-1.5 mb-5 text-sm" aria-label="Breadcrumb">
+      <NuxtLink
+        to="/"
+        class="text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300 transition-colors"
+      >
+        Projects
+      </NuxtLink>
+      <Icon name="i-lucide-chevron-right" class="w-3.5 h-3.5 text-slate-300 dark:text-zinc-600 shrink-0" />
+      <NuxtLink
+        :to="`/projects/${projectId}`"
+        class="text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300 transition-colors truncate max-w-[12rem]"
+      >
+        {{ project?.name ?? projectId }}
+      </NuxtLink>
+      <Icon name="i-lucide-chevron-right" class="w-3.5 h-3.5 text-slate-300 dark:text-zinc-600 shrink-0" />
+      <span class="text-slate-700 dark:text-zinc-300 font-medium truncate max-w-[20rem]">
+        {{ error?.title ?? errorId }}
+      </span>
+    </nav>
 
-    <UCard v-if="error">
-      <div class="flex flex-col p-2">
-        <div class="flex gap-4 mt-2 items-center">
-          <span class="font-bold text-xl">{{ error.title }} </span>
+    <div v-if="error" class="flex flex-col gap-5">
+      <!-- Error header card -->
+      <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden">
+        <!-- Top bar: title + actions -->
+        <div class="p-5 border-b border-slate-100 dark:border-zinc-800">
+          <div class="flex flex-wrap items-start gap-3">
+            <div class="flex-1 min-w-0">
+              <div class="flex flex-wrap items-center gap-2 mb-1">
+                <ErrorState :error />
+                <span class="text-xs text-slate-400 dark:text-zinc-500 font-mono">{{ errorId }}</span>
+              </div>
+              <h1 class="text-xl font-bold text-slate-900 dark:text-zinc-100 break-words">{{ error.title }}</h1>
+            </div>
 
-          <ErrorState :error />
-
-          <div class="flex flex-col items-center ml-auto">
-            <span class="text-sm text-gray-600 dark:text-gray-400">Events</span>
-            <span class="text-xl">{{ error.events }}</span>
+            <div class="flex items-center gap-2 flex-shrink-0">
+              <template v-if="error.state === 'open'">
+                <UButton
+                  icon="i-lucide-check"
+                  label="Resolve"
+                  color="green"
+                  size="sm"
+                  @click="changeState('resolved')"
+                />
+                <UButton
+                  icon="i-lucide-x"
+                  label="Ignore"
+                  color="gray"
+                  variant="ghost"
+                  size="sm"
+                  @click="changeState('ignored')"
+                />
+              </template>
+              <UButton
+                v-else-if="error.state === 'resolved' || error.state === 'ignored'"
+                icon="i-lucide-rotate-ccw"
+                label="Reopen"
+                color="gray"
+                size="sm"
+                @click="changeState('open')"
+              />
+            </div>
           </div>
-
-          <div class="flex flex-col items-center">
-            <span class="text-sm text-gray-600 dark:text-gray-400">Last Seen</span>
-            <span class="text-xl">{{ timeAgo(error.lastOccurrence) }}</span>
-          </div>
-
-          <div class="flex flex-col items-center">
-            <span class="text-sm text-gray-600 dark:text-gray-400">First Seen</span>
-            <span class="text-xl">{{ timeAgo(error.createdAt) }}</span>
-          </div>
-
-          <div v-if="error.state === 'open'" class="flex gap-2">
-            <UButton
-              icon="i-heroicons-check"
-              color="green"
-              label="Resolve"
-              size="sm"
-              @click="changeState('resolved')"
-              class="ml-2"
-            />
-            <UButton
-              icon="i-heroicons-x-mark"
-              color="gray"
-              label="Ignore"
-              size="sm"
-              @click="changeState('ignored')"
-              class="ml-2"
-            />
-          </div>
-          <UButton
-            v-else-if="error.state === 'resolved' || error.state === 'ignored'"
-            icon="i-heroicons-arrow-uturn-left"
-            color="gray"
-            label="Reopen"
-            size="sm"
-            @click="changeState('open')"
-            class="ml-4"
-          />
         </div>
 
-        <pre class="p-2 bg-gray-200 dark:bg-gray-800 rounded-md whitespace-pre-wrap w-full mt-2 mb-4">{{
-          error.value
-        }}</pre>
+        <!-- Stats row -->
+        <div class="grid grid-cols-3 divide-x divide-slate-100 dark:divide-zinc-800">
+          <div class="px-5 py-3">
+            <p class="text-xs font-medium text-slate-500 dark:text-zinc-400 uppercase tracking-wide">Events</p>
+            <p class="mt-0.5 text-2xl font-bold text-slate-900 dark:text-zinc-100">{{ error.events }}</p>
+          </div>
+          <div class="px-5 py-3">
+            <p class="text-xs font-medium text-slate-500 dark:text-zinc-400 uppercase tracking-wide">Last seen</p>
+            <p class="mt-0.5 text-lg font-semibold text-slate-900 dark:text-zinc-100">
+              {{ timeAgo(error.lastOccurrence) }}
+            </p>
+          </div>
+          <div class="px-5 py-3">
+            <p class="text-xs font-medium text-slate-500 dark:text-zinc-400 uppercase tracking-wide">First seen</p>
+            <p class="mt-0.5 text-lg font-semibold text-slate-900 dark:text-zinc-100">{{ timeAgo(error.createdAt) }}</p>
+          </div>
+        </div>
 
-        <div class="flex flex-col items-start mb-4">
-          <div class="flex items-center w-full gap-2">
-            <span v-if="errorEvent?.event" class="mb-2 font-bold"
-              >Event metadata ({{ errorEvent?.event?.event_id?.slice(0, 8) }})</span
+        <!-- Error value -->
+        <div
+          v-if="error.value"
+          class="px-5 py-4 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-800/50"
+        >
+          <pre class="text-sm text-slate-700 dark:text-zinc-300 font-mono whitespace-pre-wrap">{{ error.value }}</pre>
+        </div>
+      </div>
+
+      <!-- Event metadata card -->
+      <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden">
+        <div class="flex items-center gap-3 px-5 py-3 border-b border-slate-100 dark:border-zinc-800">
+          <h2 class="text-sm font-semibold text-slate-900 dark:text-zinc-100 flex-1">
+            Event metadata
+            <span
+              v-if="errorEvent?.event?.event_id"
+              class="text-xs font-normal text-slate-400 dark:text-zinc-500 font-mono ml-1"
             >
-
+              {{ errorEvent.event.event_id.slice(0, 8) }}
+            </span>
+          </h2>
+          <div class="flex items-center gap-1">
             <UButton
-              icon="i-mdi-chevron-left"
-              color="gray"
-              size="sm"
+              icon="i-lucide-chevron-left"
               label="Older"
-              class="ml-auto"
+              color="gray"
+              variant="ghost"
+              size="sm"
               :disabled="errorEventId === 1"
               @click="errorEventId = errorEventId - 1"
             />
+            <span class="text-xs text-slate-400 dark:text-zinc-500 px-1">{{ errorEventId }} / {{ error.events }}</span>
             <UButton
-              icon="i-mdi-chevron-right"
-              color="gray"
-              size="sm"
+              icon="i-lucide-chevron-right"
               label="Newer"
+              icon-position="right"
+              color="gray"
+              variant="ghost"
+              size="sm"
               :disabled="errorEventId === error.events"
               @click="errorEventId = errorEventId + 1"
             />
           </div>
-
-          <table v-if="errorEvent?.event" class="striped">
-            <tbody class="text-left">
-              <tr>
-                <th>Reported at</th>
-                <td>{{ new Date(errorEvent?.createdAt).toLocaleString() }}</td>
-              </tr>
-              <tr v-if="errorEvent?.event.level">
-                <th>Level</th>
-                <td>{{ errorEvent?.event.level }}</td>
-              </tr>
-              <tr v-if="errorEvent?.event.platform">
-                <th>Platform</th>
-                <td>{{ errorEvent?.event.platform }}</td>
-              </tr>
-              <tr v-if="errorEvent?.event.environment">
-                <th class="pr-4">Environment</th>
-                <td>{{ errorEvent?.event.environment }}</td>
-              </tr>
-              <tr v-if="errorEvent?.event.release">
-                <th>Release</th>
-                <td>{{ errorEvent?.event.release }}</td>
-              </tr>
-              <tr v-if="errorEvent?.event.transaction">
-                <th>Transaction</th>
-                <td>{{ errorEvent?.event.transaction }}</td>
-              </tr>
-              <tr v-if="errorEvent?.event.server_name">
-                <th>Server name</th>
-                <td>{{ errorEvent?.event.server_name }}</td>
-              </tr>
-              <tr v-if="errorEvent?.event.request?.url">
-                <th>Url</th>
-                <td>
-                  <router-link :to="errorEvent?.event.request?.url" class="text-blue-500">{{
-                    errorEvent?.event.request?.url
-                  }}</router-link>
-                </td>
-              </tr>
-              <tr v-if="userAgent?.browser.name">
-                <th>Browser</th>
-                <td>{{ userAgent?.browser.name }} {{ userAgent?.browser.version }}</td>
-              </tr>
-              <tr v-if="userAgent?.os.name">
-                <th>OS</th>
-                <td>{{ userAgent?.os.name }}</td>
-              </tr>
-            </tbody>
-          </table>
         </div>
 
-        <div class="flex border-b border-gray-200 dark:border-gray-800 mb-2 items-center gap-2">
+        <div v-if="errorEvent?.event" class="divide-y divide-slate-100 dark:divide-zinc-800">
+          <div class="grid grid-cols-[10rem_1fr] px-5 py-2.5 hover:bg-slate-50 dark:hover:bg-zinc-800/40">
+            <span class="text-sm font-medium text-slate-500 dark:text-zinc-400">Reported at</span>
+            <span class="text-sm text-slate-900 dark:text-zinc-100">{{
+              new Date(errorEvent.createdAt).toLocaleString()
+            }}</span>
+          </div>
+          <div
+            v-if="errorEvent.event.level"
+            class="grid grid-cols-[10rem_1fr] px-5 py-2.5 hover:bg-slate-50 dark:hover:bg-zinc-800/40"
+          >
+            <span class="text-sm font-medium text-slate-500 dark:text-zinc-400">Level</span>
+            <span class="text-sm text-slate-900 dark:text-zinc-100 capitalize">{{ errorEvent.event.level }}</span>
+          </div>
+          <div
+            v-if="errorEvent.event.platform"
+            class="grid grid-cols-[10rem_1fr] px-5 py-2.5 hover:bg-slate-50 dark:hover:bg-zinc-800/40"
+          >
+            <span class="text-sm font-medium text-slate-500 dark:text-zinc-400">Platform</span>
+            <span class="text-sm text-slate-900 dark:text-zinc-100">{{ errorEvent.event.platform }}</span>
+          </div>
+          <div
+            v-if="errorEvent.event.environment"
+            class="grid grid-cols-[10rem_1fr] px-5 py-2.5 hover:bg-slate-50 dark:hover:bg-zinc-800/40"
+          >
+            <span class="text-sm font-medium text-slate-500 dark:text-zinc-400">Environment</span>
+            <UBadge color="blue" variant="subtle" size="xs">{{ errorEvent.event.environment }}</UBadge>
+          </div>
+          <div
+            v-if="errorEvent.event.release"
+            class="grid grid-cols-[10rem_1fr] px-5 py-2.5 hover:bg-slate-50 dark:hover:bg-zinc-800/40"
+          >
+            <span class="text-sm font-medium text-slate-500 dark:text-zinc-400">Release</span>
+            <span class="text-sm text-slate-900 dark:text-zinc-100 font-mono">{{ errorEvent.event.release }}</span>
+          </div>
+          <div
+            v-if="errorEvent.event.transaction"
+            class="grid grid-cols-[10rem_1fr] px-5 py-2.5 hover:bg-slate-50 dark:hover:bg-zinc-800/40"
+          >
+            <span class="text-sm font-medium text-slate-500 dark:text-zinc-400">Transaction</span>
+            <span class="text-sm text-slate-900 dark:text-zinc-100 font-mono truncate">{{
+              errorEvent.event.transaction
+            }}</span>
+          </div>
+          <div
+            v-if="errorEvent.event.server_name"
+            class="grid grid-cols-[10rem_1fr] px-5 py-2.5 hover:bg-slate-50 dark:hover:bg-zinc-800/40"
+          >
+            <span class="text-sm font-medium text-slate-500 dark:text-zinc-400">Server</span>
+            <span class="text-sm text-slate-900 dark:text-zinc-100">{{ errorEvent.event.server_name }}</span>
+          </div>
+          <div
+            v-if="errorEvent.event.request?.url"
+            class="grid grid-cols-[10rem_1fr] px-5 py-2.5 hover:bg-slate-50 dark:hover:bg-zinc-800/40"
+          >
+            <span class="text-sm font-medium text-slate-500 dark:text-zinc-400">URL</span>
+            <a
+              :href="errorEvent.event.request.url"
+              target="_blank"
+              class="text-sm text-orange-600 dark:text-orange-400 hover:underline truncate"
+            >
+              {{ errorEvent.event.request.url }}
+            </a>
+          </div>
+          <div
+            v-if="userAgent?.browser.name"
+            class="grid grid-cols-[10rem_1fr] px-5 py-2.5 hover:bg-slate-50 dark:hover:bg-zinc-800/40"
+          >
+            <span class="text-sm font-medium text-slate-500 dark:text-zinc-400">Browser</span>
+            <span class="text-sm text-slate-900 dark:text-zinc-100"
+              >{{ userAgent.browser.name }} {{ userAgent.browser.version }}</span
+            >
+          </div>
+          <div
+            v-if="userAgent?.os.name"
+            class="grid grid-cols-[10rem_1fr] px-5 py-2.5 hover:bg-slate-50 dark:hover:bg-zinc-800/40"
+          >
+            <span class="text-sm font-medium text-slate-500 dark:text-zinc-400">OS</span>
+            <span class="text-sm text-slate-900 dark:text-zinc-100">{{ userAgent.os.name }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-page tabs + content -->
+      <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden">
+        <div class="px-3 pt-1 border-b border-slate-200 dark:border-zinc-800">
           <UHorizontalNavigation v-if="error && errorEvent" :links="subPages" />
         </div>
-
-        <NuxtPage v-if="error && errorEvent" :error :errorEvent />
+        <div class="p-5">
+          <NuxtPage v-if="error && errorEvent" :error :errorEvent />
+        </div>
       </div>
-    </UCard>
+    </div>
   </div>
 </template>
 
@@ -149,6 +231,7 @@ const route = useRoute();
 
 const projectId = computed(() => route.params.projectId as string);
 const errorId = computed(() => route.params.errorId as string);
+const { data: project } = await useFetch(() => `/api/projects/${projectId.value}`);
 const { data: error, refresh: refreshError } = await useFetch(
   () => `/api/projects/${projectId.value}/errors/${errorId.value}`,
 );
@@ -165,19 +248,19 @@ useSeoMeta({
 const subPages = computed(() => [
   {
     label: 'Stacktrace',
-    icon: 'i-heroicons-bolt-solid',
+    icon: 'i-lucide-code-xml',
     to: `/projects/${projectId.value}/errors/${errorId.value}/`,
     exact: true,
   },
   {
     label: 'Breadcrumbs',
-    icon: 'i-heroicons-document-magnifying-glass-16-solid',
+    icon: 'i-lucide-list-tree',
     to: `/projects/${projectId.value}/errors/${errorId.value}/breadcrumbs`,
     exact: true,
   },
   {
     label: 'Details',
-    icon: 'i-heroicons-document-magnifying-glass',
+    icon: 'i-lucide-file-search',
     to: `/projects/${projectId.value}/errors/${errorId.value}/details`,
     exact: true,
   },
@@ -185,36 +268,17 @@ const subPages = computed(() => [
 
 const userAgent = computed(() => {
   const headers = errorEvent.value?.event?.request?.headers;
-  if (!headers) {
-    return undefined;
-  }
-
+  if (!headers) return undefined;
   const ua = new UAParser(headers['User-Agent']);
-  return {
-    browser: ua.getBrowser(),
-    os: ua.getOS(),
-  };
+  return { browser: ua.getBrowser(), os: ua.getOS() };
 });
 
 async function changeState(state: 'open' | 'resolved' | 'ignored') {
   await fetch(`/api/projects/${projectId.value}/errors/${errorId.value}`, {
     method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ state }),
   });
   await refreshError();
 }
 </script>
-
-<style scoped>
-table.striped tr:nth-child(odd) {
-  @apply bg-gray-100 dark:bg-gray-800;
-}
-
-table th,
-table td {
-  @apply font-normal px-2 py-1;
-}
-</style>

@@ -1,71 +1,78 @@
 <template>
-  <div class="flex flex-col">
-    <div class="ml-auto mb-2 flex items-center gap-2">
-      <span class="text-sm text-gray-600 dark:text-gray-400">{{
-        showOnlyRelevantFrames ? 'Most relevant frames' : 'All frames'
-      }}</span>
+  <div class="flex flex-col gap-3">
+    <!-- Toggle -->
+    <div class="flex items-center justify-end gap-2">
+      <span class="text-xs text-slate-500 dark:text-zinc-400">
+        {{ showOnlyRelevantFrames ? 'Showing relevant frames' : 'Showing all frames' }}
+      </span>
       <UToggle v-model="showOnlyRelevantFrames" />
     </div>
 
-    <div class="border dark:border-gray-800 rounded-md">
+    <!-- Frames list -->
+    <div class="rounded-xl overflow-hidden border border-slate-200 dark:border-zinc-800">
       <div v-for="(frame, i) in resolvedFrames" :key="i">
+        <!-- Frame header -->
         <div
-          class="flex gap-1 p-1 bg-gray-100 dark:bg-gray-800 text-sm items-center"
-          :class="{
-            'border-t dark:border-gray-800': i > 0,
-          }"
+          class="flex gap-2 px-3 py-2 text-xs items-center cursor-pointer select-none"
+          :class="[
+            i > 0 ? 'border-t border-slate-200 dark:border-zinc-800' : '',
+            frame.in_app
+              ? 'bg-slate-50 dark:bg-zinc-800/60 hover:bg-slate-100 dark:hover:bg-zinc-800'
+              : 'bg-white dark:bg-zinc-900 hover:bg-slate-50 dark:hover:bg-zinc-800/40',
+          ]"
+          @click="toggleOpenFrame(i)"
         >
+          <!-- Filename -->
           <UTooltip v-if="frame.filename" :text="frame.filename">
-            <a
-              v-if="frame.filename.startsWith('http://') || frame.filename.startsWith('https://')"
-              :href="frame.filename"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <span class="font-bold">{{ sanitizeStacktracePath(frame.filename ?? '') }}</span>
-            </a>
-            <span v-else class="font-bold">{{ sanitizeStacktracePath(frame.filename ?? '') }}</span>
+            <template v-if="frame.filename.startsWith('http://') || frame.filename.startsWith('https://')">
+              <a
+                :href="frame.filename"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="font-semibold text-orange-600 dark:text-orange-400 hover:underline"
+                @click.stop
+              >
+                {{ sanitizeStacktracePath(frame.filename) }}
+              </a>
+            </template>
+            <span v-else class="font-semibold text-slate-800 dark:text-zinc-200">
+              {{ sanitizeStacktracePath(frame.filename) }}
+            </span>
           </UTooltip>
-          <span>in</span>
-          <span class="font-bold">{{ frame.function }}</span>
-          <span>at line</span>
-          <span class="font-bold">{{ frame.lineno }}:{{ frame.colno }}</span>
+          <span class="text-slate-400 dark:text-zinc-500">in</span>
+          <span class="font-semibold text-slate-800 dark:text-zinc-200">{{ frame.function }}</span>
+          <span class="text-slate-400 dark:text-zinc-500">line</span>
+          <span class="font-semibold text-slate-700 dark:text-zinc-300">{{ frame.lineno }}:{{ frame.colno }}</span>
 
-          <div class="ml-auto" />
-          <UBadge v-if="frame.in_app" variant="subtle" :ui="{ rounded: 'rounded-full' }" color="blue" size="sm"
-            >In App</UBadge
-          >
-          <UBadge v-if="!frame.vars?.resolved" variant="subtle" :ui="{ rounded: 'rounded-full' }" color="red" size="sm"
-            >No source map available</UBadge
-          >
-          <UButton
-            :icon="openFrames.includes(i) ? 'i-mdi-chevron-up' : 'i-mdi-chevron-down'"
-            color="gray"
-            variant="ghost"
-            size="sm"
-            @click="toggleOpenFrame(i)"
-          />
+          <div class="ml-auto flex items-center gap-1.5">
+            <UBadge v-if="frame.in_app" color="blue" variant="subtle" size="xs">In App</UBadge>
+            <UBadge v-if="!frame.vars?.resolved" color="red" variant="subtle" size="xs">No source map</UBadge>
+            <Icon
+              :name="openFrames.includes(i) ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
+              class="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500"
+            />
+          </div>
         </div>
 
-        <div v-if="openFrames.includes(i)" class="flex items-center">
-          <div class="w-full">
-            <code>
-              <div v-for="(item, index) in frame.code" :key="index" class="flex">
-                <div
-                  class="min-w-12 px-4 pt-1 select-none flex text-right content-center"
-                  :class="{ 'bg-green-600 dark:bg-green-800': item.highlight }"
-                >
-                  {{ item.line }}
-                </div>
-                <span
-                  class="whitespace-pre-wrap w-full content-center pl-4"
-                  :class="{ 'bg-gray-100 dark:bg-gray-700': item.highlight }"
-                >
-                  {{ item.code }}
-                </span>
+        <!-- Code block -->
+        <div v-if="openFrames.includes(i) && frame.code.length > 0">
+          <code class="block bg-zinc-950 dark:bg-black text-zinc-100 text-xs font-mono">
+            <div v-for="(item, idx) in frame.code" :key="idx" class="flex">
+              <div
+                class="min-w-[3rem] px-3 py-0.5 select-none text-right shrink-0 border-r"
+                :class="
+                  item.highlight
+                    ? 'bg-orange-500/20 border-orange-500 text-orange-300'
+                    : 'border-zinc-800 text-zinc-600'
+                "
+              >
+                {{ item.line }}
               </div>
-            </code>
-          </div>
+              <span class="whitespace-pre-wrap w-full pl-4 py-0.5" :class="item.highlight ? 'bg-orange-500/10' : ''">
+                {{ item.code }}
+              </span>
+            </div>
+          </code>
         </div>
       </div>
     </div>

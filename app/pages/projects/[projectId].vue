@@ -1,13 +1,19 @@
 <template>
-  <div class="flex flex-col">
-    <div class="flex mb-4 border-b-2 border-gray-200 dark:border-gray-800 items-center">
-      <router-link :to="`/projects/${projectId}`" class="text-xl font-bold flex-shrink-0">
-        <h2>Project: {{ project?.name ?? '---' }}</h2>
-      </router-link>
+  <div>
+    <!-- Project header (hidden on error detail pages which have their own breadcrumb) -->
+    <div v-if="!route.params.errorId" class="mb-6">
+      <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-zinc-400 mb-2">
+        <router-link to="/" class="hover:text-slate-700 dark:hover:text-zinc-200 transition-colors"
+          >Projects</router-link
+        >
+        <Icon name="i-lucide-chevron-right" class="w-3.5 h-3.5" />
+        <span class="text-slate-900 dark:text-zinc-100 font-medium">{{ project?.name ?? '...' }}</span>
+      </div>
 
-      <UHorizontalNavigation :links="links" class="ml-auto w-auto" />
-
-      <!-- <router-link :to="`/projects/${projectId}/setup`" class="ml-auto">Setup</router-link> -->
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-zinc-100">{{ project?.name ?? '...' }}</h1>
+        <UHorizontalNavigation :links="links" />
+      </div>
     </div>
 
     <NuxtPage />
@@ -22,7 +28,7 @@ const { data: project } = await useFetch(() => `/api/projects/${projectId.value}
 
 const { data: errors } = await useFetch(() => `/api/projects/${projectId.value}/errors`, {
   query: {
-    state: 'open', // Default to open errors
+    state: 'open',
   },
   default: () => [],
 });

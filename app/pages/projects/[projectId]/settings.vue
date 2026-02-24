@@ -1,15 +1,36 @@
 <template>
-  <UCard>
-    <h2 class="text-xl">Settings</h2>
+  <div>
+    <UCard>
+      <template #header>
+        <h2 class="text-base font-semibold text-slate-900 dark:text-zinc-100">Project Settings</h2>
+      </template>
 
-    <div class="mt-4">
-      <span>DSN:</span>
-      <pre class="border dark:border-gray-800 rounded-md p-2 bg-gray-200 dark:bg-gray-800">{{ dsn }}</pre>
-      <router-link :to="`/projects/${route.params.projectId}/setup`" class="mt-4 text-blue-600 underline"
-        >Setup</router-link
-      >
-    </div>
-  </UCard>
+      <div class="flex flex-col gap-4">
+        <div>
+          <label class="text-sm font-medium text-slate-700 dark:text-zinc-300 block mb-1.5">DSN</label>
+          <div class="flex items-center gap-2">
+            <code
+              class="flex-1 block text-xs bg-slate-100 dark:bg-zinc-800 text-slate-800 dark:text-zinc-200 border border-slate-200 dark:border-zinc-700 rounded-lg p-3 font-mono overflow-x-auto"
+            >
+              {{ dsn }}
+            </code>
+          </div>
+          <p class="mt-1.5 text-xs text-slate-500 dark:text-zinc-400">Use this DSN in your Sentry SDK configuration.</p>
+        </div>
+
+        <div class="pt-2">
+          <UButton
+            icon="i-lucide-book-open"
+            label="View setup guide"
+            variant="outline"
+            color="gray"
+            size="sm"
+            :to="`/projects/${route.params.projectId}/setup`"
+          />
+        </div>
+      </div>
+    </UCard>
+  </div>
 </template>
 
 <script lang="ts" setup>
