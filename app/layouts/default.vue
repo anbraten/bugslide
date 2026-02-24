@@ -3,15 +3,15 @@
     <header
       class="sticky top-0 z-30 border-b border-slate-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm"
     >
-      <div class="max-w-7xl mx-auto px-4 h-14 flex items-center gap-3">
+      <div class="max-w-7xl mx-auto px-4 h-16 flex items-center gap-3">
         <router-link
           class="flex items-center gap-2 font-bold text-slate-900 dark:text-zinc-100 hover:opacity-80 transition-opacity"
           to="/"
         >
-          <span class="flex items-center justify-center w-7 h-7 bg-orange-500 rounded-lg">
-            <Icon name="i-lucide-flame" class="w-4 h-4 text-white" />
+          <span class="flex items-center justify-center w-8 h-8 bg-orange-500 rounded-lg">
+            <Icon name="i-lucide-flame" class="w-5 h-5 text-white" />
           </span>
-          <span class="text-base tracking-tight">BugSlide</span>
+          <span class="text-lg tracking-tight">BugSlide</span>
         </router-link>
 
         <div class="ml-auto flex items-center gap-1">
@@ -19,11 +19,11 @@
 
           <UDropdown v-if="user" :items="items" :popper="{ placement: 'bottom-start' }">
             <button
-              class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 hover:text-slate-900 dark:hover:text-zinc-100 transition-colors"
+              class="flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 hover:text-slate-900 dark:hover:text-zinc-100 transition-colors"
             >
-              <UAvatar :src="user?.avatarUrl ?? ''" class="w-6 h-6" />
+              <UAvatar :src="user?.avatarUrl ?? ''" class="w-7 h-7" />
               <span class="hidden sm:block">{{ user?.email?.split('@')[0] }}</span>
-              <Icon name="i-lucide-chevron-down" class="w-3.5 h-3.5" />
+              <Icon name="i-lucide-chevron-down" class="w-4 h-4" />
             </button>
 
             <template #account="{ item }">
@@ -37,11 +37,11 @@
       </div>
     </header>
 
-    <main class="flex-1 max-w-7xl mx-auto w-full px-4 py-6">
+    <main class="flex-1 max-w-7xl mx-auto w-full px-4 py-8">
       <slot />
     </main>
 
-    <footer class="py-4 text-center text-xs text-slate-400 dark:text-zinc-600">Built with ❤️</footer>
+    <footer class="py-4 text-center text-sm text-slate-400 dark:text-zinc-600">Built with ❤️</footer>
 
     <UNotifications />
   </div>

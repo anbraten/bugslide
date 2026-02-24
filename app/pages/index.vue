@@ -2,8 +2,8 @@
   <div>
     <div class="flex items-center justify-between mb-6">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900 dark:text-zinc-100">Projects</h1>
-        <p class="mt-0.5 text-sm text-slate-500 dark:text-zinc-400">Monitor and manage errors from your projects</p>
+        <h1 class="text-3xl font-bold text-slate-900 dark:text-zinc-100">Projects</h1>
+        <p class="mt-0.5 text-base text-slate-500 dark:text-zinc-400">Monitor and manage errors from your projects</p>
       </div>
       <UButton icon="i-lucide-plus" label="New project" size="sm" to="/projects/create" />
     </div>
@@ -26,22 +26,22 @@
       >
         <div class="flex items-start justify-between">
           <div
-            class="w-9 h-9 bg-orange-50 dark:bg-orange-500/10 rounded-lg flex items-center justify-center flex-shrink-0"
+            class="w-11 h-11 bg-orange-50 dark:bg-orange-500/10 rounded-lg flex items-center justify-center flex-shrink-0"
           >
-            <Icon name="i-lucide-flame" class="w-4 h-4 text-orange-500" />
+            <Icon name="i-lucide-flame" class="w-5 h-5 text-orange-500" />
           </div>
           <Icon
             name="i-lucide-arrow-right"
-            class="w-4 h-4 text-slate-300 dark:text-zinc-600 group-hover:text-orange-400 transition-colors mt-1"
+            class="w-5 h-5 text-slate-300 dark:text-zinc-600 group-hover:text-orange-400 transition-colors mt-1"
           />
         </div>
         <div class="mt-3">
           <h3
-            class="font-semibold text-slate-900 dark:text-zinc-100 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors"
+            class="font-semibold text-base text-slate-900 dark:text-zinc-100 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors"
           >
             {{ project.name }}
           </h3>
-          <p class="mt-0.5 text-xs text-slate-400 dark:text-zinc-500">Click to view errors</p>
+          <p class="mt-0.5 text-sm text-slate-400 dark:text-zinc-500">Click to view errors</p>
         </div>
       </router-link>
     </div>

@@ -2,7 +2,7 @@
   <div>
     <!-- Project header (hidden on error detail pages which have their own breadcrumb) -->
     <div v-if="!route.params.errorId" class="mb-6">
-      <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-zinc-400 mb-2">
+      <div class="flex items-center gap-2 text-base text-slate-500 dark:text-zinc-400 mb-2">
         <router-link to="/" class="hover:text-slate-700 dark:hover:text-zinc-200 transition-colors"
           >Projects</router-link
         >
@@ -11,7 +11,7 @@
       </div>
 
       <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-slate-900 dark:text-zinc-100">{{ project?.name ?? '...' }}</h1>
+        <h1 class="text-3xl font-bold text-slate-900 dark:text-zinc-100">{{ project?.name ?? '...' }}</h1>
         <UHorizontalNavigation :links="links" />
       </div>
     </div>

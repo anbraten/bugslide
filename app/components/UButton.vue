@@ -40,9 +40,9 @@ const classes = computed(() => {
 
   const sizes: Record<string, string> = {
     xs: 'px-2 py-1 text-xs',
-    sm: 'px-2.5 py-1.5 text-sm',
-    md: 'px-3.5 py-2 text-sm',
-    lg: 'px-4 py-2.5 text-base',
+    sm: 'px-3 py-1.5 text-sm',
+    md: 'px-4 py-2 text-base',
+    lg: 'px-5 py-2.5 text-lg',
   };
 
   const color = props.color ?? 'primary';

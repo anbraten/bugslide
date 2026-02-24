@@ -7,7 +7,7 @@
         <button
           v-for="tab in tabs"
           :key="tab.value"
-          class="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
+          class="flex items-center gap-1.5 px-3.5 py-2 rounded-md text-sm font-medium transition-colors"
           :class="
             state === tab.value
               ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-zinc-100 shadow-sm'
@@ -31,13 +31,13 @@
       <div class="relative sm:ml-auto w-full sm:w-64">
         <Icon
           name="i-lucide-search"
-          class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-zinc-500 pointer-events-none"
+          class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-zinc-500 pointer-events-none"
         />
         <input
           v-model="search"
           type="search"
           placeholder="Search errors…"
-          class="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          class="w-full pl-10 pr-3 py-2.5 text-base rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
         />
       </div>
     </div>
@@ -97,12 +97,12 @@
         v-for="error in filteredErrors"
         :key="error.id"
         :to="`/projects/${projectId}/errors/${error.id}`"
-        class="group flex items-start gap-4 px-5 py-4 hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-500"
+        class="group flex items-start gap-4 px-5 py-5 hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-500"
       >
         <!-- Colored status dot -->
         <div class="mt-1.5 shrink-0">
           <span
-            class="block w-2.5 h-2.5 rounded-full"
+            class="block w-3 h-3 rounded-full"
             :class="{
               'bg-orange-500 shadow-[0_0_0_3px] shadow-orange-500/20': error.state === 'open',
               'bg-emerald-500 shadow-[0_0_0_3px] shadow-emerald-500/20': error.state === 'resolved',
@@ -115,19 +115,19 @@
         <div class="flex-1 min-w-0">
           <div class="flex items-baseline gap-2 flex-wrap">
             <span
-              class="font-semibold text-slate-900 dark:text-zinc-100 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors"
+              class="font-semibold text-base text-slate-900 dark:text-zinc-100 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors"
             >
               {{ error.title }}
             </span>
           </div>
-          <p class="mt-0.5 text-sm text-slate-500 dark:text-zinc-400 line-clamp-1">{{ error.value }}</p>
+          <p class="mt-0.5 text-base text-slate-500 dark:text-zinc-400 line-clamp-1">{{ error.value }}</p>
           <div class="flex items-center gap-3 mt-2 flex-wrap">
-            <span class="text-xs text-slate-400 dark:text-zinc-500 flex items-center gap-1">
-              <Icon name="i-lucide-clock" class="w-3 h-3" />
+            <span class="text-sm text-slate-400 dark:text-zinc-500 flex items-center gap-1.5">
+              <Icon name="i-lucide-clock" class="w-4 h-4" />
               First seen {{ timeAgo(error.createdAt) }} ago
             </span>
-            <span class="text-xs text-slate-400 dark:text-zinc-500 flex items-center gap-1">
-              <Icon name="i-lucide-refresh-cw" class="w-3 h-3" />
+            <span class="text-sm text-slate-400 dark:text-zinc-500 flex items-center gap-1.5">
+              <Icon name="i-lucide-refresh-cw" class="w-4 h-4" />
               Last seen {{ timeAgo(error.lastOccurrence) }} ago
             </span>
           </div>
@@ -135,16 +135,16 @@
 
         <!-- Events count -->
         <div class="shrink-0 text-right">
-          <div class="text-xl font-bold text-slate-800 dark:text-zinc-200 tabular-nums leading-none">
+          <div class="text-2xl font-bold text-slate-800 dark:text-zinc-200 tabular-nums leading-none">
             {{ error.events }}
           </div>
-          <div class="text-xs text-slate-400 dark:text-zinc-500 mt-0.5">events</div>
+          <div class="text-sm text-slate-400 dark:text-zinc-500 mt-0.5">events</div>
         </div>
 
         <!-- Arrow -->
         <Icon
           name="i-lucide-chevron-right"
-          class="w-4 h-4 text-slate-300 dark:text-zinc-600 group-hover:text-orange-400 transition-colors shrink-0 self-center"
+          class="w-5 h-5 text-slate-300 dark:text-zinc-600 group-hover:text-orange-400 transition-colors shrink-0 self-center"
         />
       </NuxtLink>
     </div>
