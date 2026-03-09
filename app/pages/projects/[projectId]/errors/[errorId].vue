@@ -96,6 +96,15 @@
         >
           <pre class="text-sm text-slate-700 dark:text-zinc-300 font-mono whitespace-pre-wrap">{{ error.value }}</pre>
         </div>
+
+        <!-- Activity chart -->
+        <div class="px-5 py-4 border-t border-slate-100 dark:border-zinc-800">
+          <p class="text-xs font-medium text-slate-500 dark:text-zinc-400 uppercase tracking-wide mb-3">
+            Event rate — last 30 days
+          </p>
+          <ActivityChart v-if="errorActivity" :data="errorActivity" />
+          <div v-else class="h-16 bg-slate-100 dark:bg-zinc-800 rounded-lg animate-pulse" />
+        </div>
       </div>
 
       <!-- Event metadata card -->
@@ -247,6 +256,11 @@ const { data: error, refresh: refreshError } = await useFetch(
 const errorEventId = ref(1);
 const { data: errorEvent } = await useFetch(
   () => `/api/projects/${projectId.value}/errors/${errorId.value}/events/${errorEventId.value}`,
+);
+
+const { data: errorActivity } = await useFetch<{ date: string; count: number }[]>(
+  () => `/api/projects/${projectId.value}/errors/${errorId.value}/activity`,
+  { default: () => [] },
 );
 
 useSeoMeta({
