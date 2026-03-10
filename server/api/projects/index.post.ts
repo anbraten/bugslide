@@ -15,10 +15,20 @@ export default defineEventHandler(async (event) => {
     name: string;
   }>(event);
 
-  const [project] = await db.insert(projectsTable).values({
-    name: input.name,
-    publicSecret: randomString(32),
-   }).returning();
+  const [project] = await db
+    .insert(projectsTable)
+    .values({
+      name: input.name,
+      publicSecret: randomString(32),
+    })
+    .returning();
+
+  if (!project) {
+    throw createError({
+      statusCode: 500,
+      message: 'Failed to create project',
+    });
+  }
 
   await db.insert(userProjectsTable).values({
     userId: user.id,

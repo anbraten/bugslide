@@ -36,7 +36,7 @@ async function createProject() {
 
   toast.add({
     title: 'Project created',
-    description: `"${project.value.name}" has been created successfully`,
+    description: `"${_project.name}" has been created successfully`,
   });
 
   await navigateTo(`/projects/${_project.id}`);
