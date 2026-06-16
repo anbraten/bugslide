@@ -1,0 +1,6 @@
+allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true
+minimumReleaseAgeExclude:
+  - '@libsql/client@0.17.4'
+  - '@libsql/core@0.17.4'
