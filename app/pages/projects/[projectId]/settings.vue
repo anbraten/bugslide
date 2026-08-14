@@ -30,6 +30,30 @@
         </div>
       </div>
     </UCard>
+
+    <UCard class="mt-6 border-red-200 dark:border-red-900/50">
+      <template #header>
+        <h2 class="text-base font-semibold text-red-600 dark:text-red-400">Danger Zone</h2>
+      </template>
+
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <p class="text-sm font-medium text-slate-900 dark:text-zinc-100">Delete this project</p>
+          <p class="mt-0.5 text-xs text-slate-500 dark:text-zinc-400">
+            This will permanently delete the project and all of its errors, releases, and uploaded source maps.
+          </p>
+        </div>
+        <UButton
+          icon="i-lucide-trash-2"
+          label="Delete project"
+          color="red"
+          variant="outline"
+          size="sm"
+          :disabled="deleting"
+          @click="deleteProject"
+        />
+      </div>
+    </UCard>
   </div>
 </template>
 
@@ -37,6 +61,7 @@
 import type { Project } from '#server/utils/db';
 
 const route = useRoute();
+const toast = useToast();
 
 const { data: project } = await useFetch<Project>(`/api/projects/${route.params.projectId as string}`);
 
@@ -46,4 +71,34 @@ const dsn = computed(
       route.params.projectId
     }`,
 );
+
+const deleting = ref(false);
+
+async function deleteProject() {
+  const typedName = window.prompt(`This will permanently delete this project. Type "${project.value?.name}" to confirm.`);
+  if (typedName !== project.value?.name) {
+    return;
+  }
+
+  deleting.value = true;
+
+  try {
+    await $fetch(`/api/projects/${route.params.projectId as string}`, { method: 'DELETE' });
+
+    toast.add({
+      title: 'Project deleted',
+      description: `"${project.value?.name}" has been deleted`,
+    });
+
+    await navigateTo('/');
+  } catch (error) {
+    toast.add({
+      title: 'Failed to delete project',
+      description: error instanceof Error ? error.message : 'Please try again.',
+      color: 'red',
+    });
+  } finally {
+    deleting.value = false;
+  }
+}
 </script>

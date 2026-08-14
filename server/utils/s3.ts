@@ -1,4 +1,4 @@
-import { S3Client } from '@aws-sdk/client-s3';
+import { DeleteObjectsCommand, ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3';
 
 export async function getS3Client() {
   const config = await useRuntimeConfig();
@@ -18,4 +18,30 @@ export async function getS3Client() {
   });
 
   return s3;
+}
+
+export async function deleteS3Prefix(s3Client: S3Client, bucket: string, prefix: string) {
+  let continuationToken: string | undefined;
+
+  do {
+    const listResponse = await s3Client.send(
+      new ListObjectsV2Command({
+        Bucket: bucket,
+        Prefix: prefix,
+        ContinuationToken: continuationToken,
+      }),
+    );
+
+    const objects = (listResponse.Contents ?? []).flatMap((object) => (object.Key ? [{ Key: object.Key }] : []));
+    if (objects.length > 0) {
+      await s3Client.send(
+        new DeleteObjectsCommand({
+          Bucket: bucket,
+          Delete: { Objects: objects },
+        }),
+      );
+    }
+
+    continuationToken = listResponse.IsTruncated ? listResponse.NextContinuationToken : undefined;
+  } while (continuationToken);
 }

@@ -76,7 +76,8 @@ const classes = computed(() => {
     red: {
       solid: 'bg-red-500 text-white hover:bg-red-600 focus-visible:ring-red-500 shadow-sm',
       ghost: 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10',
-      outline: 'border border-red-500 text-red-600 hover:bg-red-50 dark:text-red-400 dark:border-red-500/50',
+      outline:
+        'border border-red-500 text-red-600 hover:bg-red-50 dark:text-red-400 dark:border-red-500/50 dark:hover:bg-red-500/10',
       soft: 'bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400',
     },
     white: {
