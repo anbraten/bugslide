@@ -26,3 +26,12 @@ body {
     sans-serif;
   @apply bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 antialiased;
 }
+
+html {
+  @apply bg-slate-50 dark:bg-zinc-950;
+}
+
+html,
+body {
+  overflow-x: hidden;
+}

@@ -5,7 +5,7 @@
       :key="link.to"
       :to="link.to"
       :exact="link.exact"
-      class="relative flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-colors"
+      class="relative flex shrink-0 items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-colors"
       :class="
         isActive(link)
           ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10'
