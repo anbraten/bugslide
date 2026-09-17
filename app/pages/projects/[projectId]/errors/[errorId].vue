@@ -67,22 +67,22 @@
 
         <!-- Stats row -->
         <div class="grid grid-cols-3 divide-x divide-slate-100 dark:divide-zinc-800">
-          <div class="px-5 py-3">
+          <div class="px-5 py-3 min-w-0">
             <p class="text-xs font-medium text-slate-500 dark:text-zinc-400 uppercase tracking-wide">Events</p>
-            <p class="mt-0.5 text-2xl font-bold text-slate-900 dark:text-zinc-100">{{ error.events }}</p>
+            <p class="mt-0.5 text-2xl font-bold text-slate-900 dark:text-zinc-100 truncate">{{ error.events }}</p>
           </div>
-          <div class="px-5 py-3">
+          <div class="px-5 py-3 min-w-0">
             <p class="text-xs font-medium text-slate-500 dark:text-zinc-400 uppercase tracking-wide">Last seen</p>
             <UTooltip :text="formatAbsolute(error.lastOccurrence)">
-              <p class="mt-0.5 text-lg font-semibold text-slate-900 dark:text-zinc-100 cursor-default">
+              <p class="mt-0.5 text-lg font-semibold text-slate-900 dark:text-zinc-100 cursor-default truncate">
                 {{ timeAgo(error.lastOccurrence) }} ago
               </p>
             </UTooltip>
           </div>
-          <div class="px-5 py-3">
+          <div class="px-5 py-3 min-w-0">
             <p class="text-xs font-medium text-slate-500 dark:text-zinc-400 uppercase tracking-wide">First seen</p>
             <UTooltip :text="formatAbsolute(error.createdAt)">
-              <p class="mt-0.5 text-lg font-semibold text-slate-900 dark:text-zinc-100 cursor-default">
+              <p class="mt-0.5 text-lg font-semibold text-slate-900 dark:text-zinc-100 cursor-default truncate">
                 {{ timeAgo(error.createdAt) }} ago
               </p>
             </UTooltip>
@@ -230,7 +230,7 @@
 
       <!-- Sub-page tabs + content -->
       <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden">
-        <div class="px-3 pt-1 border-b border-slate-200 dark:border-zinc-800">
+        <div class="px-3 pt-1 border-b border-slate-200 dark:border-zinc-800 overflow-x-auto">
           <UHorizontalNavigation v-if="error && errorEvent" :links="subPages" />
         </div>
         <div class="p-5">

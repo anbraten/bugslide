@@ -1,0 +1,10 @@
+html,
+body {
+  background-color: #f8fafc;
+  overflow-x: hidden;
+}
+
+html.dark,
+html.dark body {
+  background-color: #09090b;
+}
