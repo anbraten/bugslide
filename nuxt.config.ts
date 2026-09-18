@@ -31,6 +31,8 @@ export default defineNuxtConfig({
       password: '',
       clientId: '',
       clientSecret: '',
+      // only ever set this on Vercel's Preview environment scope, never Production
+      previewBypassEmail: '',
     },
     db: {
       tursoDatabaseUrl: '',
