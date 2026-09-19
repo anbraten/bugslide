@@ -1,11 +1,11 @@
 <template>
   <div>
-    <div class="flex items-center justify-between mb-6">
-      <div>
-        <h1 class="text-3xl font-bold text-slate-900 dark:text-zinc-100">Projects</h1>
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+      <div class="min-w-0">
+        <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-zinc-100">Projects</h1>
         <p class="mt-0.5 text-base text-slate-500 dark:text-zinc-400">Monitor and manage errors from your projects</p>
       </div>
-      <UButton icon="i-lucide-plus" label="New project" size="sm" to="/projects/create" />
+      <UButton icon="i-lucide-plus" label="New project" size="sm" to="/projects/create" class="self-start" />
     </div>
 
     <div v-if="projects.length === 0" class="flex flex-col items-center justify-center py-20 text-center">
@@ -37,7 +37,7 @@
         </div>
         <div class="mt-3">
           <h3
-            class="font-semibold text-base text-slate-900 dark:text-zinc-100 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors"
+            class="font-semibold text-base text-slate-900 dark:text-zinc-100 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors break-words"
           >
             {{ project.name }}
           </h3>
