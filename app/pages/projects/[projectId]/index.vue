@@ -160,14 +160,14 @@
 
         <!-- Main content -->
         <div class="flex-1 min-w-0">
-          <div class="flex items-baseline gap-2 flex-wrap">
+          <div class="flex items-baseline gap-2 flex-wrap min-w-0">
             <span
-              class="font-semibold text-base text-slate-900 dark:text-zinc-100 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors"
+              class="font-semibold text-base text-slate-900 dark:text-zinc-100 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors break-words min-w-0"
             >
               {{ error.title }}
             </span>
           </div>
-          <p class="mt-0.5 text-base text-slate-500 dark:text-zinc-400 line-clamp-1">{{ error.value }}</p>
+          <p class="mt-0.5 text-base text-slate-500 dark:text-zinc-400 line-clamp-1 break-words">{{ error.value }}</p>
           <div class="flex items-center gap-3 mt-2 flex-wrap">
             <UTooltip :text="formatAbsolute(error.createdAt)">
               <span class="text-sm text-slate-400 dark:text-zinc-500 flex items-center gap-1.5 cursor-default">

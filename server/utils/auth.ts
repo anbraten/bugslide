@@ -11,12 +11,22 @@ export async function useAuthSession(event: H3Event) {
 }
 
 export async function getUser(event: H3Event): Promise<User | undefined> {
+  const db = await useDb(event);
+
+  // Vercel Authentication already restricts who can reach preview deployments at all,
+  // so the GitHub login round-trip (which only has one fixed callback URL) is redundant
+  // there and would just break on every preview's throwaway URL. VERCEL_ENV is set by
+  // Vercel's infra itself, not by app config, so this can't accidentally fire in production.
+  const previewBypassEmail = useRuntimeConfig(event).auth.previewBypassEmail;
+  if (process.env.VERCEL_ENV === 'preview' && previewBypassEmail) {
+    return await db.select().from(usersTable).where(eq(usersTable.email, previewBypassEmail)).get();
+  }
+
   const session = await useAuthSession(event);
   if (!session.data?.userId) {
     return undefined;
   }
 
-  const db = await useDb(event);
   return await db.select().from(usersTable).where(eq(usersTable.id, session.data.userId)).get();
 }
 
