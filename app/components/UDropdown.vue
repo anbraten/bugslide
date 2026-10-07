@@ -16,7 +16,7 @@
     >
       <div
         v-if="open"
-        class="absolute right-0 top-full mt-1.5 z-50 min-w-[11rem] bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-xl shadow-xl overflow-hidden"
+        class="absolute right-0 top-full mt-1.5 z-50 min-w-44 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-xl shadow-xl overflow-hidden"
       >
         <template v-for="(group, gi) in items" :key="gi">
           <div v-if="gi > 0" class="border-t border-slate-100 dark:border-zinc-800" />
@@ -41,7 +41,7 @@
                   <Icon
                     v-if="item.icon"
                     :name="item.icon"
-                    class="w-4 h-4 flex-shrink-0 text-slate-400 dark:text-zinc-500"
+                    class="w-4 h-4 shrink-0 text-slate-400 dark:text-zinc-500"
                   />
                   <span class="truncate flex-1">{{ item.label }}</span>
                 </slot>

@@ -10,7 +10,7 @@
 
       <!-- Icon dot -->
       <div
-        class="absolute left-0 top-1 flex-shrink-0 w-7 h-7 rounded-full border-2 border-white dark:border-zinc-900 flex items-center justify-center"
+        class="absolute left-0 top-1 shrink-0 w-7 h-7 rounded-full border-2 border-white dark:border-zinc-900 flex items-center justify-center"
         :class="{
           'bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400': getColor(breadcrumb) === 'red',
           'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400':

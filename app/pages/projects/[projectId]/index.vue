@@ -34,7 +34,7 @@
           class="flex items-center gap-1.5 px-3.5 py-2 rounded-md text-sm font-medium transition-colors"
           :class="
             state === tab.value
-              ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-zinc-100 shadow-sm'
+              ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-zinc-100 shadow-xs'
               : 'text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-200'
           "
           @click="state = tab.value"
@@ -59,7 +59,7 @@
           class="flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors"
           :class="
             sort === s.value
-              ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-zinc-100 shadow-sm'
+              ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-zinc-100 shadow-xs'
               : 'text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-200'
           "
           @click="sort = s.value"
@@ -79,7 +79,7 @@
           v-model="search"
           type="search"
           placeholder="Search errors…"
-          class="w-full pl-10 pr-3 py-2.5 text-base rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          class="w-full pl-10 pr-3 py-2.5 text-base rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-transparent"
         />
       </div>
     </div>
@@ -144,7 +144,7 @@
         v-for="error in errors"
         :key="error.id"
         :to="`/projects/${projectId}/errors/${error.id}`"
-        class="group flex items-start gap-4 px-5 py-5 hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-500"
+        class="group flex items-start gap-4 px-5 py-5 hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-500"
       >
         <!-- Colored status dot -->
         <div class="mt-1.5 shrink-0">

@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen flex flex-col bg-slate-50 dark:bg-zinc-950">
     <header
-      class="sticky top-0 z-30 border-b border-slate-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm"
+      class="sticky top-0 z-30 border-b border-slate-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xs"
     >
       <div class="max-w-7xl mx-auto px-4 h-16 flex items-center gap-3">
         <router-link

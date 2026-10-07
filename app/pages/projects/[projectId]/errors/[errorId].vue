@@ -11,7 +11,7 @@
       <Icon name="i-lucide-chevron-right" class="w-3.5 h-3.5 text-slate-300 dark:text-zinc-600 shrink-0" />
       <NuxtLink
         :to="`/projects/${projectId}`"
-        class="text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300 transition-colors truncate max-w-[12rem]"
+        class="text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300 transition-colors truncate max-w-48"
       >
         {{ project?.name ?? projectId }}
       </NuxtLink>
@@ -32,10 +32,10 @@
                 <ErrorState :error />
                 <span class="text-xs text-slate-400 dark:text-zinc-500 font-mono">{{ errorId }}</span>
               </div>
-              <h1 class="text-xl font-bold text-slate-900 dark:text-zinc-100 break-words">{{ error.title }}</h1>
+              <h1 class="text-xl font-bold text-slate-900 dark:text-zinc-100 wrap-break-word">{{ error.title }}</h1>
             </div>
 
-            <div class="flex items-center gap-2 flex-shrink-0">
+            <div class="flex items-center gap-2 shrink-0">
               <template v-if="error.state === 'open'">
                 <UButton
                   icon="i-lucide-check"

@@ -10,7 +10,7 @@
       <p class="mt-1.5 text-sm text-slate-500 dark:text-zinc-400">Sign in to track and manage your errors</p>
     </div>
 
-    <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-sm p-6">
+    <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-xs p-6">
       <UButton
         icon="i-ion-logo-github"
         label="Continue with GitHub"

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="relative inline-flex items-center justify-center rounded-full bg-slate-200 dark:bg-zinc-700 overflow-hidden flex-shrink-0"
+    class="relative inline-flex items-center justify-center rounded-full bg-slate-200 dark:bg-zinc-700 overflow-hidden shrink-0"
     v-bind="$attrs"
   >
     <img v-if="src" :src="src" :alt="alt ?? ''" class="w-full h-full object-cover" @error="imgError = true" />

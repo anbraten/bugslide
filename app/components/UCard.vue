@@ -4,7 +4,7 @@ defineOptions({ inheritAttrs: false });
 
 <template>
   <div
-    class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl shadow-sm"
+    class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl shadow-xs"
     v-bind="$attrs"
   >
     <div v-if="$slots.header" class="px-5 py-4 border-b border-slate-200 dark:border-zinc-800">

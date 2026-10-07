@@ -12,7 +12,7 @@
           : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800'
       "
     >
-      <Icon v-if="link.icon" :name="link.icon" class="w-4 h-4 flex-shrink-0" />
+      <Icon v-if="link.icon" :name="link.icon" class="w-4 h-4 shrink-0" />
       <span>{{ link.label }}</span>
       <span
         v-if="link.badge !== undefined && link.badge !== 0"

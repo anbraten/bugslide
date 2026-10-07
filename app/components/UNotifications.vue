@@ -31,7 +31,7 @@
                     ? 'i-lucide-triangle-alert'
                     : 'i-lucide-info'
             "
-            class="w-5 h-5 flex-shrink-0 opacity-90"
+            class="w-5 h-5 shrink-0 opacity-90"
           />
           <!-- Content -->
           <div class="flex-1 min-w-0">
@@ -40,7 +40,7 @@
           </div>
           <!-- Close -->
           <button
-            class="flex-shrink-0 p-1 rounded-lg opacity-60 hover:opacity-100 hover:bg-white/15 transition-all"
+            class="shrink-0 p-1 rounded-lg opacity-60 hover:opacity-100 hover:bg-white/15 transition-all"
             @click="remove(toast.id)"
           >
             <Icon name="i-lucide-x" class="w-4 h-4" />

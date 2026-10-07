@@ -59,7 +59,7 @@
           <code class="block bg-zinc-950 dark:bg-black text-zinc-100 text-xs font-mono">
             <div v-for="(item, idx) in frame.code" :key="idx" class="flex">
               <div
-                class="min-w-[3rem] px-3 py-0.5 select-none text-right shrink-0 border-r"
+                class="min-w-12 px-3 py-0.5 select-none text-right shrink-0 border-r"
                 :class="
                   item.highlight
                     ? 'bg-orange-500/20 border-orange-500 text-orange-300'
