@@ -88,12 +88,13 @@ export default defineEventHandler(async (event) => {
     })
     .returning();
 
-  if (users?.length !== 1) {
+  const dbUser = users?.[0];
+  if (users?.length !== 1 || !dbUser) {
     throw new Error('Failed to create user');
   }
 
   await session.update({
-    userId: users[0].id,
+    userId: dbUser.id,
   });
 
   return sendRedirect(event, '/');

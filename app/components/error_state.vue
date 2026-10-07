@@ -6,6 +6,6 @@
 
 <script lang="ts" setup>
 defineProps<{
-  error: CaughtError;
+  error: Pick<CaughtError, 'state'>;
 }>();
 </script>

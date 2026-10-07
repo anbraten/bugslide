@@ -1,18 +1,14 @@
-import { H3Event } from 'h3';
+import type { H3Event } from 'h3';
 import { SourceMapConsumer } from 'source-map';
 import { Readable } from 'node:stream';
+import { text } from 'node:stream/consumers';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { StackFrame } from '@sentry/core';
+import type { StackFrame } from '@sentry/core';
 import { and, eq, inArray } from 'drizzle-orm';
 import { artifactBundleFilesTable } from './db';
 
 function streamToString(stream: Readable): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const chunks: any[] = [];
-    stream.on('data', (chunk) => chunks.push(chunk));
-    stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf-8')));
-    stream.on('error', reject);
-  });
+  return text(stream);
 }
 
 export async function resolveSourceFrames(event: H3Event, projectId: string, release: string, frames: StackFrame[]) {

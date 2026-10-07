@@ -1,7 +1,7 @@
-import nodemailer from 'nodemailer';
+import nodemailer, { type Transporter } from 'nodemailer';
 import type { H3Event } from 'h3';
 
-export function useMail(event: H3Event): nodemailer.Transporter | undefined {
+export function useMail(event: H3Event): Transporter | undefined {
   const config = useRuntimeConfig(event);
 
   const mailConfig = config.mail;
@@ -11,17 +11,19 @@ export function useMail(event: H3Event): nodemailer.Transporter | undefined {
     return undefined;
   }
 
-  return nodemailer.createTransport({
-    host: mailConfig.host,
-    port: mailConfig.port,
-    secure: isTrue(mailConfig.secure),
-    requireTLS: isTrue(mailConfig.requireTLS),
-    auth: {
-      user: mailConfig.username,
-      pass: mailConfig.password,
+  return nodemailer.createTransport(
+    {
+      host: mailConfig.host,
+      port: mailConfig.port,
+      secure: isTrue(mailConfig.secure),
+      requireTLS: isTrue(mailConfig.requireTLS),
+      auth: {
+        user: mailConfig.username,
+        pass: mailConfig.password,
+      },
     },
-    from: mailConfig.from,
-  });
+    { from: mailConfig.from },
+  );
 }
 
 function isTrue(value: any): boolean {

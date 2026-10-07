@@ -26,5 +26,10 @@ export async function createOrGetRelease(event: H3Event, project: Project, relea
     })
     .returning();
 
-  return res?.[0];
+  const created = res?.[0];
+  if (!created) {
+    throw new Error('Failed to create release');
+  }
+
+  return created;
 }

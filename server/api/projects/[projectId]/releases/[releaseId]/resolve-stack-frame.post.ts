@@ -1,4 +1,4 @@
-import { StackFrame } from '@sentry/core';
+import type { StackFrame } from '@sentry/core';
 import { resolveSourceFrames } from '#server/utils/source-map';
 
 export default defineEventHandler(async (event) => {

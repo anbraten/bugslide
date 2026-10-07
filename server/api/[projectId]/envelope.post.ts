@@ -1,4 +1,4 @@
-import { parseEnvelope, forEachEnvelopeItem, Exception, EventItem, Event } from '@sentry/core';
+import { parseEnvelope, forEachEnvelopeItem, type Exception, type EventItem, type Event } from '@sentry/core';
 import { and, eq, sql } from 'drizzle-orm';
 import type { H3Event } from 'h3';
 import { createOrGetRelease } from '#server/utils/releases';
@@ -144,7 +144,10 @@ async function saveError(event: H3Event, project: Project, exception: Exception,
       })
       .returning();
 
-    error = res?.[0];
+    error = res?.[0] ?? null;
+    if (!error) {
+      throw new Error('Failed to create error');
+    }
 
     // send new error mail
     try {

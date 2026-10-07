@@ -10,8 +10,9 @@ import { Readable } from 'stream';
 import { createGunzip } from 'zlib';
 import { pipeline } from 'node:stream/promises';
 import { PassThrough } from 'node:stream';
+import { buffer } from 'node:stream/consumers';
 import yauzl, { Entry } from 'yauzl';
-import { ArtifactBundleFile, artifactBundleFilesTable } from '#server/utils/db';
+import { type ArtifactBundleFile, artifactBundleFilesTable } from '#server/utils/db';
 
 export default defineEventHandler(async (event) => {
   const project = await requireProjectByToken(event);
@@ -257,12 +258,7 @@ class ArtifactBundleAssembler {
 }
 
 function streamToBuffer(stream: Readable): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    stream.on('data', (chunk) => chunks.push(chunk));
-    stream.on('end', () => resolve(Buffer.concat(chunks)));
-    stream.on('error', reject);
-  });
+  return buffer(stream);
 }
 
 class Zip {

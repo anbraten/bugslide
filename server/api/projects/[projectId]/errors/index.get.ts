@@ -30,10 +30,11 @@ export default defineEventHandler(async (event) => {
     search ? or(like(errorsTable.title, `%${search}%`), like(errorsTable.value, `%${search}%`)) : undefined,
   );
 
-  const [items, [{ total }]] = await Promise.all([
+  const [items, [totalRow]] = await Promise.all([
     db.select().from(errorsTable).where(where).orderBy(orderBy).limit(limitNum).offset(offset),
     db.select({ total: count() }).from(errorsTable).where(where),
   ]);
+  const total = totalRow?.total ?? 0;
 
   return {
     items,

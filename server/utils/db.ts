@@ -1,8 +1,8 @@
 import { int, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
-import { Event, Stacktrace } from '@sentry/core';
-import { InferSelectModel } from 'drizzle-orm';
+import type { Event, Stacktrace } from '@sentry/core';
+import type { InferSelectModel } from 'drizzle-orm';
 import type { H3Event } from 'h3';
 
 let db: ReturnType<typeof drizzle> | null = null;
@@ -23,7 +23,7 @@ export function useDb(event: H3Event) {
 
 export async function getFirstElement<T>(p: Promise<T[]>): Promise<T | null> {
   const items = await p;
-  return items && items.length > 0 ? items[0] : null;
+  return items?.[0] ?? null;
 }
 
 export const projectsTable = sqliteTable('projects', {
