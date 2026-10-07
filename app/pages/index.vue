@@ -41,7 +41,31 @@
           >
             {{ project.name }}
           </h3>
-          <p class="mt-0.5 text-sm text-slate-400 dark:text-zinc-500">Click to view errors</p>
+        </div>
+        <div class="mt-3 flex items-end justify-between gap-3">
+          <div class="flex gap-4 min-w-0">
+            <div>
+              <p
+                class="text-lg font-semibold leading-tight"
+                :class="project.openErrors > 0 ? 'text-slate-900 dark:text-zinc-100' : 'text-slate-400 dark:text-zinc-500'"
+              >
+                {{ project.openErrors }}
+              </p>
+              <p class="text-xs text-slate-400 dark:text-zinc-500">open issues</p>
+            </div>
+            <div>
+              <p
+                class="text-lg font-semibold leading-tight"
+                :class="project.events24h > 0 ? 'text-slate-900 dark:text-zinc-100' : 'text-slate-400 dark:text-zinc-500'"
+              >
+                {{ project.events24h }}
+              </p>
+              <p class="text-xs text-slate-400 dark:text-zinc-500">events 24h</p>
+            </div>
+          </div>
+          <UTooltip text="Events in the last 14 days">
+            <Sparkline :data="project.trend" class="w-24 h-7" />
+          </UTooltip>
         </div>
       </router-link>
     </div>
