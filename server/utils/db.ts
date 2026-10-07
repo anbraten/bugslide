@@ -65,6 +65,7 @@ export const errorsTable = sqliteTable('errors', {
   state: text().notNull().$type<'open' | 'resolved' | 'ignored'>(),
   events: int().notNull(),
   lastOccurrence: int({ mode: 'timestamp' }).notNull(),
+  regressedAt: int({ mode: 'timestamp' }),
 });
 export type CaughtError = InferSelectModel<typeof errorsTable>;
 

@@ -167,6 +167,12 @@
               {{ error.value || error.title }}
             </span>
             <UBadge v-if="isNew(error)" color="orange" variant="subtle" size="xs" class="shrink-0">New</UBadge>
+            <UTooltip
+              v-else-if="error.state === 'open' && error.regressedAt"
+              :text="`Reopened after resolve ${timeAgo(error.regressedAt)} ago`"
+            >
+              <UBadge color="red" variant="subtle" size="xs" class="shrink-0">Regressed</UBadge>
+            </UTooltip>
           </div>
           <p class="mt-0.5 text-sm text-slate-500 dark:text-zinc-400 font-mono truncate">
             <span class="font-semibold text-slate-600 dark:text-zinc-300">{{ error.title }}</span>

@@ -144,6 +144,7 @@ async function saveError(event: H3Event, project: Project, exception: Exception,
       .update(errorsTable)
       .set({
         state: 'open', // reopen error in case it was resolved
+        ...(error.state === 'resolved' ? { regressedAt: new Date() } : {}),
         events: sql`${errorsTable.events} + 1`,
         updatedAt: new Date(),
         lastOccurrence: new Date(),

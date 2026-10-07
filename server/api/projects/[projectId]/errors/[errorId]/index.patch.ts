@@ -19,7 +19,8 @@ export default defineEventHandler(async (event) => {
 
   const error = await db
     .update(errorsTable)
-    .set({ state: body.state, updatedAt: new Date() })
+    // a manual state change acknowledges a regression
+    .set({ state: body.state, regressedAt: null, updatedAt: new Date() })
     .where(and(eq(errorsTable.projectId, project.id), eq(errorsTable.id, parseInt(errorId, 10))))
     .returning()
     .get();
