@@ -14,12 +14,6 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // const { sentry_key, sentry_client, sentry_version } = getQuery<{
-  //   sentry_key?: string;
-  //   sentry_version?: string;
-  //   sentry_client?: string;
-  // }>(event);
-
   const db = await useDb(event);
   const project = await getFirstElement(
     db
@@ -34,11 +28,16 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // TODO: validate Sentry key and client
-
   const sentryEnvelope = await readBody(event);
 
   const envelope = parseEnvelope(sentryEnvelope);
+
+  if (getSentryKey(event, envelope[0].dsn) !== project.publicSecret) {
+    throw createError({
+      message: 'Invalid or missing sentry key',
+      status: 401,
+    });
+  }
 
   const errorEvents: Event[] = [];
   forEachEnvelopeItem(envelope, (item, itemType) => {
@@ -84,6 +83,30 @@ export default defineEventHandler(async (event) => {
     ok: true,
   };
 });
+
+// the SDKs send the DSN public key as query param (browser), in the X-Sentry-Auth header (server) or inside the envelope header (tunnel)
+function getSentryKey(event: H3Event, envelopeDsn?: string): string | undefined {
+  const { sentry_key } = getQuery<{ sentry_key?: string }>(event);
+  if (sentry_key) {
+    return sentry_key;
+  }
+
+  const authHeader = getHeader(event, 'x-sentry-auth');
+  const headerKey = authHeader?.match(/sentry_key=([^,\s]+)/)?.[1];
+  if (headerKey) {
+    return headerKey;
+  }
+
+  if (envelopeDsn) {
+    try {
+      return new URL(envelopeDsn).username || undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
+  return undefined;
+}
 
 async function saveError(event: H3Event, project: Project, exception: Exception, errorEvent: Event) {
   const db = await useDb(event);

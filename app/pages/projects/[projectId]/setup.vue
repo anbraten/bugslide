@@ -22,9 +22,13 @@
 </template>
 
 <script lang="ts" setup>
+import type { Project } from '#server/utils/db';
+
 const route = useRoute();
 
-const publicSecret = computed(() => 'can-be-ignored');
+const { data: project } = await useFetch<Project>(`/api/projects/${route.params.projectId as string}`);
+
+const publicSecret = computed(() => project.value?.publicSecret ?? '');
 
 const setupCode = computed(() =>
   `
