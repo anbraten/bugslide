@@ -16,20 +16,22 @@
     "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1110.0",
-    "@aws-sdk/lib-storage": "^3.1110.0",
-    "@fastify/busboy": "^3.2.1",
-    "@libsql/client": "^0.17.4",
-    "@nuxt/icon": "^2.5.0",
+    "@aws-sdk/client-s3": "^3.1145.0",
+    "@aws-sdk/lib-storage": "^3.1145.0",
+    "@fastify/busboy": "^3.2.2",
+    "@libsql/client": "^0.18.0",
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "@nuxt/icon": "^2.5.1",
     "@nuxtjs/color-mode": "^4.0.1",
     "@nuxtjs/tailwindcss": "^6.14.0",
-    "@sentry/core": "^10.70.0",
-    "drizzle-orm": "^0.45.2",
-    "nodemailer": "^9.0.5",
-    "nuxt": "^4.5.2",
+    "@sentry/core": "^11.5.0",
+    "drizzle-orm": "^0.45.3",
+    "nodemailer": "^10.0.15",
+    "nuxt": "^4.6.0",
     "source-map": "^0.8.0",
     "ua-parser-js": "^2.0.10",
-    "yauzl": "^3.4.0"
+    "yauzl": "^3.4.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@iconify-json/heroicons": "^1.2.3",
