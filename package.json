@@ -11,6 +11,7 @@
     "postinstall": "nuxt prepare",
     "db:push": "pnpm drizzle-kit push",
     "db:generate": "pnpm drizzle-kit generate",
+    "db:migrate": "pnpm drizzle-kit migrate",
     "db:up": "pnpm drizzle-kit up",
     "db:ui": "pnpm drizzle-kit studio",
     "typecheck": "vue-tsc --noEmit"

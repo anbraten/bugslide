@@ -57,6 +57,13 @@
       "when": 1791384440812,
       "tag": "0007_flowery_dust",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1791385530509,
+      "tag": "0008_renumber_error_events",
+      "breakpoints": true
     }
   ]
 }
