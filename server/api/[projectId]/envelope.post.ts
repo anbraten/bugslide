@@ -1,5 +1,5 @@
 import { parseEnvelope, forEachEnvelopeItem, Exception, EventItem, Event } from '@sentry/core';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import type { H3Event } from 'h3';
 import { createOrGetRelease } from '#server/utils/releases';
 
@@ -116,16 +116,18 @@ async function saveError(event: H3Event, project: Project, exception: Exception,
       }
     }
 
-    // update error
-    await db
+    // update error, increment the counter atomically so concurrent events get unique event ids
+    error = await db
       .update(errorsTable)
       .set({
         state: 'open', // reopen error in case it was resolved
-        events: error.events + 1,
+        events: sql`${errorsTable.events} + 1`,
         updatedAt: new Date(),
         lastOccurrence: new Date(),
       })
-      .where(eq(errorsTable.id, error.id));
+      .where(eq(errorsTable.id, error.id))
+      .returning()
+      .get();
   } else {
     // create new error
     const res = await db
