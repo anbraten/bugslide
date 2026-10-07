@@ -1,5 +1,7 @@
-import { and, count, desc, eq, like, or } from 'drizzle-orm';
+import { and, count, desc, eq, gte, inArray, like, or, sql } from 'drizzle-orm';
 import { requireProject } from '#server/utils/auth';
+
+const TREND_DAYS = 14;
 
 export default defineEventHandler(async (event) => {
   const db = await useDb(event);
@@ -36,8 +38,44 @@ export default defineEventHandler(async (event) => {
   ]);
   const total = totalRow?.total ?? 0;
 
+  const errorIds = items.map((item) => item.id);
+  const trendSince = new Date();
+  trendSince.setDate(trendSince.getDate() - (TREND_DAYS - 1));
+  trendSince.setHours(0, 0, 0, 0);
+
+  const [trendRows, firstEvents] = errorIds.length
+    ? await Promise.all([
+        db
+          .select({
+            error: errorEventsTable.error,
+            day: sql<string>`strftime('%Y-%m-%d', ${errorEventsTable.createdAt}, 'unixepoch')`.as('day'),
+            count: sql<number>`count(*)`.as('count'),
+          })
+          .from(errorEventsTable)
+          .where(and(inArray(errorEventsTable.error, errorIds), gte(errorEventsTable.createdAt, trendSince)))
+          .groupBy(errorEventsTable.error, sql`day`),
+        db
+          .select({ error: errorEventsTable.error, stacktrace: errorEventsTable.stacktrace })
+          .from(errorEventsTable)
+          .where(and(inArray(errorEventsTable.error, errorIds), eq(errorEventsTable.eventId, 1))),
+      ])
+    : [[], []];
+
+  const days: string[] = [];
+  for (let i = TREND_DAYS - 1; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    days.push(d.toISOString().slice(0, 10));
+  }
+
   return {
-    items,
+    items: items.map((item) => ({
+      ...item,
+      culprit: getCulprit(firstEvents.find((e) => e.error === item.id)?.stacktrace),
+      trend: days.map(
+        (day) => trendRows.find((row) => row.error === item.id && row.day === day)?.count ?? 0,
+      ),
+    })),
     total,
     page: pageNum,
     limit: limitNum,

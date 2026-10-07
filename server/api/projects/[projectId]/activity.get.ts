@@ -1,4 +1,4 @@
-import { and, eq, gte, sql } from 'drizzle-orm';
+import { and, eq, gte, ne, sql } from 'drizzle-orm';
 import { requireProject } from '#server/utils/auth';
 
 export default defineEventHandler(async (event) => {
@@ -17,7 +17,13 @@ export default defineEventHandler(async (event) => {
     })
     .from(errorEventsTable)
     .innerJoin(errorsTable, eq(errorEventsTable.error, errorsTable.id))
-    .where(and(eq(errorsTable.projectId, project.id), gte(errorEventsTable.createdAt, thirtyDaysAgo)))
+    .where(
+      and(
+        eq(errorsTable.projectId, project.id),
+        ne(errorsTable.state, 'ignored'),
+        gte(errorEventsTable.createdAt, thirtyDaysAgo),
+      ),
+    )
     .groupBy(sql`day`)
     .orderBy(sql`day`);
 

@@ -30,9 +30,18 @@
             <div class="flex-1 min-w-0">
               <div class="flex flex-wrap items-center gap-2 mb-1">
                 <ErrorState :error />
-                <span class="text-xs text-slate-400 dark:text-zinc-500 font-mono">{{ errorId }}</span>
+                <span class="text-sm font-mono">
+                  <span class="font-semibold text-slate-700 dark:text-zinc-300">{{ error.title }}</span>
+                  <template v-if="culprit">
+                    <span class="text-slate-300 dark:text-zinc-600 mx-1.5">·</span>
+                    <span class="text-slate-500 dark:text-zinc-400">{{ culprit }}</span>
+                  </template>
+                </span>
+                <span class="text-xs text-slate-400 dark:text-zinc-500 font-mono">#{{ errorId }}</span>
               </div>
-              <h1 class="text-xl font-bold text-slate-900 dark:text-zinc-100 wrap-break-word">{{ error.title }}</h1>
+              <h1 class="text-xl font-bold text-slate-900 dark:text-zinc-100 wrap-break-word line-clamp-3">
+                {{ error.value || error.title }}
+              </h1>
             </div>
 
             <div class="flex items-center gap-2 shrink-0">
@@ -89,9 +98,9 @@
           </div>
         </div>
 
-        <!-- Error value -->
+        <!-- Full error value, only when the headline can't show all of it -->
         <div
-          v-if="error.value"
+          v-if="error.value && (error.value.length > 200 || error.value.includes('\n'))"
           class="px-5 py-4 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-800/50"
         >
           <pre class="text-sm text-slate-700 dark:text-zinc-300 font-mono whitespace-pre-wrap">{{ error.value }}</pre>
@@ -253,10 +262,19 @@ const { data: error, refresh: refreshError } = await useFetch(
   () => `/api/projects/${projectId.value}/errors/${errorId.value}`,
 );
 
-const errorEventId = ref(1);
+// start on the newest event, that's the one an alert points to
+const errorEventId = ref(error.value?.events ?? 1);
+watch(
+  () => error.value?.id,
+  () => {
+    errorEventId.value = error.value?.events ?? 1;
+  },
+);
 const { data: errorEvent } = await useFetch(
   () => `/api/projects/${projectId.value}/errors/${errorId.value}/events/${errorEventId.value}`,
 );
+
+const culprit = computed(() => getCulprit(errorEvent.value?.stacktrace));
 
 const { data: errorActivity } = await useFetch<{ date: string; count: number }[]>(
   () => `/api/projects/${projectId.value}/errors/${errorId.value}/activity`,

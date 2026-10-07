@@ -160,14 +160,20 @@
 
         <!-- Main content -->
         <div class="flex-1 min-w-0">
-          <div class="flex items-baseline gap-2 flex-wrap">
+          <div class="flex items-center gap-2 min-w-0">
             <span
-              class="font-semibold text-base text-slate-900 dark:text-zinc-100 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors"
+              class="font-semibold text-base text-slate-900 dark:text-zinc-100 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors line-clamp-2 sm:line-clamp-1 wrap-break-word"
             >
-              {{ error.title }}
+              {{ error.value || error.title }}
             </span>
+            <UBadge v-if="isNew(error)" color="orange" variant="subtle" size="xs" class="shrink-0">New</UBadge>
           </div>
-          <p class="mt-0.5 text-base text-slate-500 dark:text-zinc-400 line-clamp-1">{{ error.value }}</p>
+          <p class="mt-0.5 text-sm text-slate-500 dark:text-zinc-400 font-mono truncate">
+            <span class="font-semibold text-slate-600 dark:text-zinc-300">{{ error.title }}</span>
+            <template v-if="error.culprit">
+              <span class="text-slate-300 dark:text-zinc-600 mx-1.5">·</span>{{ error.culprit }}
+            </template>
+          </p>
           <div class="flex items-center gap-3 mt-2 flex-wrap">
             <UTooltip :text="formatAbsolute(error.createdAt)">
               <span class="text-sm text-slate-400 dark:text-zinc-500 flex items-center gap-1.5 cursor-default">
@@ -184,8 +190,15 @@
           </div>
         </div>
 
+        <!-- 14-day trend -->
+        <div class="hidden sm:block shrink-0 self-center">
+          <UTooltip text="Events in the last 14 days">
+            <Sparkline :data="error.trend" class="w-28 h-7" />
+          </UTooltip>
+        </div>
+
         <!-- Events count -->
-        <div class="shrink-0 text-right">
+        <div class="shrink-0 text-right w-16">
           <div class="text-2xl font-bold text-slate-800 dark:text-zinc-200 tabular-nums leading-none">
             {{ error.events }}
           </div>
@@ -292,6 +305,10 @@ const { data: response } = await useFetch(() => `/api/projects/${projectId.value
 });
 
 const errors = computed(() => response.value?.items ?? []);
+
+function isNew(error: { createdAt: string | Date }) {
+  return Date.now() - new Date(error.createdAt).getTime() < 24 * 60 * 60 * 1000;
+}
 
 const { data: activity } = await useFetch<{ date: string; count: number }[]>(
   () => `/api/projects/${projectId.value}/activity`,
