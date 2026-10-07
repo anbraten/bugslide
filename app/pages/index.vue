@@ -37,7 +37,7 @@
         </div>
         <div class="mt-3">
           <h3
-            class="font-semibold text-base text-slate-900 dark:text-zinc-100 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors break-words"
+            class="font-semibold text-base text-slate-900 dark:text-zinc-100 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors wrap-break-word"
           >
             {{ project.name }}
           </h3>

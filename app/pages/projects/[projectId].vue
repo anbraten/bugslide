@@ -11,7 +11,7 @@
       </div>
 
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-zinc-100 break-words">
+        <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-zinc-100 wrap-break-word">
           {{ project?.name ?? '...' }}
         </h1>
         <UHorizontalNavigation :links="links" class="overflow-x-auto" />
