@@ -6,12 +6,12 @@ import type { H3Event } from 'h3';
 import { z } from 'zod';
 import { resolveSourceFrames } from '#server/utils/source-map';
 
-// MCP endpoint (streamable HTTP, stateless) to give AI agents access to the errors of a project.
-// Authenticated with the project API token: `Authorization: Bearer <token>`
+// MCP endpoint (streamable HTTP, stateless) to give AI agents access to the errors of all projects of a user.
+// Authenticated with the personal API token of the user: `Authorization: Bearer <token>`
 export default defineEventHandler(async (event) => {
-  const project = await requireProjectByToken(event);
+  const user = await requireUserByToken(event);
 
-  const server = createMcpServer(event, project);
+  const server = createMcpServer(event, user);
   const transport = new WebStandardStreamableHTTPServerTransport({
     sessionIdGenerator: undefined,
     enableJsonResponse: true,
@@ -34,13 +34,57 @@ function errorUrl(event: H3Event, project: Project, errorId: number) {
   return `${useRuntimeConfig(event).public.host}/projects/${project.id}/errors/${errorId}`;
 }
 
-function createMcpServer(event: H3Event, project: Project) {
+function createMcpServer(event: H3Event, user: User) {
   const db = useDb(event);
+
+  async function getProject(projectId: number) {
+    const res = await db
+      .select()
+      .from(projectsTable)
+      .innerJoin(userProjectsTable, eq(projectsTable.id, userProjectsTable.projectId))
+      .where(and(eq(userProjectsTable.userId, user.id), eq(projectsTable.id, projectId)))
+      .get();
+    return res?.projects;
+  }
+
+  // load an error and its project if the user has access to it
+  async function getError(errorId: number) {
+    const error = await getFirstElement(db.select().from(errorsTable).where(eq(errorsTable.id, errorId)));
+    const project = error ? await getProject(error.projectId) : undefined;
+    if (!error || !project) {
+      return undefined;
+    }
+    return { error, project };
+  }
+
+  function notFound(text: string) {
+    return { isError: true, content: [{ type: 'text' as const, text }] };
+  }
 
   const server = new McpServer(
     { name: 'bugslide', version: '1.0.0' },
     {
-      instructions: `Access to the errors captured by Bugslide (a Sentry-compatible error tracker) for the project "${project.name}". Use list_errors to find errors and get_error to inspect the stack trace, breadcrumbs and context of an error.`,
+      instructions:
+        'Access to the errors captured by Bugslide (a Sentry-compatible error tracker). Use list_projects to find the project matching the current codebase, list_errors to find its errors and get_error to inspect the stack trace, breadcrumbs and context of an error.',
+    },
+  );
+
+  server.registerTool(
+    'list_projects',
+    {
+      title: 'List projects',
+      description: 'List the projects the user has access to.',
+      inputSchema: {},
+      annotations: { readOnlyHint: true },
+    },
+    async () => {
+      const projects = await db
+        .select({ id: projectsTable.id, name: projectsTable.name })
+        .from(projectsTable)
+        .innerJoin(userProjectsTable, eq(projectsTable.id, userProjectsTable.projectId))
+        .where(eq(userProjectsTable.userId, user.id));
+
+      return json(projects);
     },
   );
 
@@ -50,6 +94,7 @@ function createMcpServer(event: H3Event, project: Project) {
       title: 'List errors',
       description: 'List the errors (issues) of the project. Each error groups all events with the same type and message.',
       inputSchema: {
+        projectId: z.number().int().describe('Id of the project (see list_projects)'),
         state: z.enum(['open', 'resolved', 'ignored']).optional().describe('Filter by state. Defaults to all states.'),
         sort: z.enum(['lastSeen', 'firstSeen', 'events']).optional().describe('Sort order. Defaults to lastSeen.'),
         search: z.string().optional().describe('Search in error type and message'),
@@ -58,7 +103,12 @@ function createMcpServer(event: H3Event, project: Project) {
       },
       annotations: { readOnlyHint: true },
     },
-    async ({ state, sort, search, page = 1, limit = 25 }) => {
+    async ({ projectId, state, sort, search, page = 1, limit = 25 }) => {
+      const project = await getProject(projectId);
+      if (!project) {
+        return notFound(`Project ${projectId} not found`);
+      }
+
       const orderBy = (() => {
         if (sort === 'firstSeen') return desc(errorsTable.createdAt);
         if (sort === 'events') return desc(errorsTable.events);
@@ -123,15 +173,11 @@ function createMcpServer(event: H3Event, project: Project) {
       annotations: { readOnlyHint: true },
     },
     async ({ errorId, eventId, allFrames }) => {
-      const error = await getFirstElement(
-        db
-          .select()
-          .from(errorsTable)
-          .where(and(eq(errorsTable.projectId, project.id), eq(errorsTable.id, errorId))),
-      );
-      if (!error) {
-        return { isError: true, content: [{ type: 'text', text: `Error ${errorId} not found` }] };
+      const res = await getError(errorId);
+      if (!res) {
+        return notFound(`Error ${errorId} not found`);
       }
+      const { error, project } = res;
 
       const errorEvent = await getFirstElement(
         db
@@ -212,15 +258,19 @@ function createMcpServer(event: H3Event, project: Project) {
       annotations: { destructiveHint: false, idempotentHint: true },
     },
     async ({ errorId, state }) => {
+      if (!(await getError(errorId))) {
+        return notFound(`Error ${errorId} not found`);
+      }
+
       const error = await db
         .update(errorsTable)
         .set({ state, updatedAt: new Date() })
-        .where(and(eq(errorsTable.projectId, project.id), eq(errorsTable.id, errorId)))
+        .where(eq(errorsTable.id, errorId))
         .returning()
         .get();
 
       if (!error) {
-        return { isError: true, content: [{ type: 'text', text: `Error ${errorId} not found` }] };
+        return notFound(`Error ${errorId} not found`);
       }
 
       return json({ id: error.id, state: error.state });

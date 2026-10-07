@@ -73,6 +73,27 @@ export async function requireProject(event: H3Event, projectId: number | string 
   return project;
 }
 
+export async function requireUserByToken(event: H3Event): Promise<User> {
+  const token = getHeader(event, 'Authorization')?.replace('Bearer ', '');
+  if (!token) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Unauthorized',
+    });
+  }
+
+  const db = await useDb(event);
+  const user = await db.select().from(usersTable).where(eq(usersTable.apiToken, token)).get();
+  if (!user) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Unauthorized',
+    });
+  }
+
+  return user;
+}
+
 export async function requireProjectByToken(event: H3Event) {
   const token = getHeader(event, 'Authorization')?.replace('Bearer ', '');
   if (!token) {

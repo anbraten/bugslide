@@ -60,6 +60,11 @@ const items = computed(() => [
   ],
   [
     {
+      label: 'Settings',
+      icon: 'i-lucide-settings',
+      to: '/settings',
+    },
+    {
       label: 'GitHub',
       icon: 'i-ion-logo-github',
       to: 'https://github.com/anbraten/bugslide',

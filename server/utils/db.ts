@@ -38,6 +38,7 @@ export const usersTable = sqliteTable('users', {
   name: text('name'),
   avatarUrl: text('avatarUrl'),
   email: text('email').unique(),
+  apiToken: text('apiToken').unique(),
 });
 export type User = InferSelectModel<typeof usersTable>;
 
