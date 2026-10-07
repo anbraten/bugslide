@@ -93,8 +93,8 @@ export async function requireProjectByToken(event: H3Event) {
 
   if (!res) {
     throw createError({
-      statusCode: 404,
-      message: 'Project not found',
+      statusCode: 401,
+      statusMessage: 'Unauthorized',
     });
   }
 
