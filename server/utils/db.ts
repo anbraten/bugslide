@@ -14,8 +14,8 @@ export function useDb(event: H3Event) {
 
   const config = useRuntimeConfig(event);
   const client = createClient({
-    url: config.db.tursoDatabaseUrl,
-    authToken: config.db.tursoAuthToken,
+    url: config.db.tursoDatabaseUrl || process.env.LIBSQL_URL!,
+    authToken: config.db.tursoAuthToken || process.env.LIBSQL_AUTH_TOKEN,
   });
   db = drizzle(client);
   return db;
