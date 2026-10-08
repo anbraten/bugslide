@@ -14,7 +14,8 @@
     "db:migrate": "pnpm drizzle-kit migrate",
     "db:up": "pnpm drizzle-kit up",
     "db:ui": "pnpm drizzle-kit studio",
-    "typecheck": "vue-tsc --noEmit"
+    "typecheck": "vue-tsc --noEmit",
+    "screenshots": "node scripts/screenshots.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1145.0",
@@ -43,6 +44,8 @@
     "@types/yauzl": "^3.4.0",
     "dotenv": "^17.4.2",
     "drizzle-kit": "^0.31.10",
+    "h3": "^1.15.11",
+    "playwright": "^1.63.0",
     "tailwindcss": "^4.3.3",
     "vue-tsc": "^3.3.9"
   }
