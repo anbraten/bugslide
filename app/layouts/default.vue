@@ -61,7 +61,7 @@
       <slot />
     </main>
 
-    <footer class="py-4 text-center text-sm text-slate-400 dark:text-zinc-600">Built with ❤️</footer>
+    <footer class="py-4 text-center text-sm text-slate-400 dark:text-zinc-600"><a href="https://github.com/anbraten/bugslide" target="_blank" rel="noopener" class="hover:underline">Built with ❤️</a></footer>
 
     <UNotifications />
   </div>
