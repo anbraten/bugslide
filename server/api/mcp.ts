@@ -207,7 +207,12 @@ function createMcpServer(event: H3Event, user: User) {
         }));
 
         // same release as used by the UI
-        const resolved = await resolveSourceFrames(event, project.id.toString(), 'latest', rawFrames);
+        const resolved = await resolveSourceFrames(
+          event,
+          project.id.toString(),
+          errorEvent.release || 'latest',
+          rawFrames,
+        );
         frames = resolved
           .filter((frame): frame is StackFrame => !!frame)
           .filter((frame) => allFrames || !frame.filename?.includes('node_modules/'))
