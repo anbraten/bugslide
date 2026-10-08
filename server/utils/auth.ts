@@ -10,6 +10,11 @@ export async function useAuthSession(event: H3Event) {
   return await useSession<AuthSession>(event, sessionConfig);
 }
 
+export function getOAuthRedirectUri(event: H3Event) {
+  const host = useRuntimeConfig(event).public.host || getRequestURL(event).origin;
+  return new URL('/api/auth/callback', host).toString();
+}
+
 export async function getUser(event: H3Event): Promise<User | undefined> {
   const session = await useAuthSession(event);
   if (!session.data?.userId) {

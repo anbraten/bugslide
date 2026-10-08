@@ -19,6 +19,7 @@ export default defineEventHandler(async (event) => {
       client_id: config.auth.clientId,
       client_secret: config.auth.clientSecret,
       code,
+      redirect_uri: getOAuthRedirectUri(event),
       grant_type: 'authorization_code',
     },
     headers: {
