@@ -8,6 +8,9 @@ It is designed to be self-hosted and easy to use.
 - Capture errors from Sentry-compatible SDKs
 - Analyse errors with stack trace, breadcrumbs and release information
 - Receive email alerts when new error is captured
+- Source maps, releases and per-release error tracking
+- Resolve, reopen and ignore issues with trends, affected users and tag breakdowns
+- Copy errors as markdown for AI tools and an MCP server
 
 ![Screenshot error](./docs/screenshot_error.png)
 
@@ -42,40 +45,3 @@ Sentry.init({
 
 Sentry.captureMessage('Hello, world!');
 ```
-
-## TODO
-
-- [ ] Fix events counter race-condition when inserting multiple events at once
-- [x] Add support for multiple projects
-  - [x] Add new project
-  - [ ] Delete project
-  - [x] Only return projects that user is assigned to
-  - [ ] Assign user to project
-  - [ ] Set / show user project api token
-- [x] Source maps
-  - [x] Upload source maps
-  - [x] Show stack trace with source maps
-  - [ ] Retention policy for source maps (last event with source map)
-- [x] Add button to resolve, reopen, ignore errors
-- [ ] Allow to delete errors
-- [x] Releases
-  - [x] Automatically create release when first event is received
-  - [ ] Link to open release in forge
-- [ ] Environment
-  - [ ] Automatically create environment when first event is received
-- [x] Allow filtering by
-  - [ ] Environment
-  - [ ] Release
-  - [x] Status (resolved / unresolved / ignored)
-- [ ] Multiedit
-  - [ ] Allow ignoring multiple errors at once
-  - [ ] Allow resolving multiple errors at once
-- [ ] Pagination
-  - [ ] Paginate errors
-- [ ] rate limiting & quotas
-  - [ ] event submission x / minute
-  - [ ] delete resolved issues after x days
-  - [ ] delete error event data after x days
-  - [ ] delete oldest event if limit x is reached
-- [x] Alert via email when new issue is created
-- [ ] Add first seen / last seen in release ...
