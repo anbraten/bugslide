@@ -116,13 +116,14 @@
                   {{ timeAgo(errorEvent.createdAt) }} ago
                 </span>
               </UTooltip>
-              <span
+              <NuxtLink
                 v-if="eventRelease"
-                class="text-xs font-mono text-slate-500 dark:text-zinc-400 truncate max-w-48"
+                :to="releaseLink(eventRelease)"
+                class="text-xs font-mono text-slate-500 dark:text-zinc-400 hover:text-orange-600 dark:hover:text-orange-400 transition-colors truncate max-w-48"
                 :title="eventRelease"
               >
                 <Icon name="i-lucide-rocket" class="w-3 h-3 align-[-1px]" /> {{ eventRelease }}
-              </span>
+              </NuxtLink>
             </div>
             <div class="flex items-center gap-0.5">
               <UButton
@@ -174,7 +175,7 @@
               :release="eventRelease"
             />
             <ErrorBreadcrumbs :event="errorEvent.event" />
-            <ErrorContext :event="errorEvent.event" />
+            <ErrorContext :project-id="projectId" :event="errorEvent.event" />
           </template>
           <p
             v-else
@@ -212,13 +213,14 @@
                       {{ timeAgo(error.createdAt) }} ago
                     </span>
                   </UTooltip>
-                  <p
+                  <NuxtLink
                     v-if="summary?.firstRelease"
-                    class="text-xs font-mono text-slate-500 dark:text-zinc-400 truncate"
+                    :to="releaseLink(summary.firstRelease)"
+                    class="block text-xs font-mono text-slate-500 dark:text-zinc-400 hover:text-orange-600 dark:hover:text-orange-400 transition-colors truncate"
                     :title="summary.firstRelease"
                   >
                     in {{ summary.firstRelease }}
-                  </p>
+                  </NuxtLink>
                 </dd>
               </div>
               <div>
@@ -229,13 +231,14 @@
                       {{ timeAgo(error.lastOccurrence) }} ago
                     </span>
                   </UTooltip>
-                  <p
+                  <NuxtLink
                     v-if="summary?.lastRelease"
-                    class="text-xs font-mono text-slate-500 dark:text-zinc-400 truncate"
+                    :to="releaseLink(summary.lastRelease)"
+                    class="block text-xs font-mono text-slate-500 dark:text-zinc-400 hover:text-orange-600 dark:hover:text-orange-400 transition-colors truncate"
                     :title="summary.lastRelease"
                   >
                     in {{ summary.lastRelease }}
-                  </p>
+                  </NuxtLink>
                 </dd>
               </div>
             </dl>
@@ -302,6 +305,10 @@ const { data: errorEvent } = await useFetch<{
   stacktrace: Stacktrace | null;
   event: Event | null;
 }>(() => `/api/projects/${projectId.value}/errors/${errorId.value}/events/${errorEventId.value}`);
+
+function releaseLink(version: string) {
+  return `/projects/${projectId.value}/releases/${encodeURIComponent(version)}`;
+}
 
 const eventRelease = computed(() => errorEvent.value?.release ?? errorEvent.value?.event?.release ?? null);
 // an event can carry a chain of exceptions, this error was grouped by one of them

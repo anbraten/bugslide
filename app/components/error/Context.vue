@@ -25,8 +25,14 @@
           <div v-for="[label, value] in group.items" :key="label" class="grid grid-cols-[7rem_1fr] gap-2 py-0.5">
             <dt class="text-slate-500 dark:text-zinc-400 truncate" :title="label">{{ label }}</dt>
             <dd class="text-slate-900 dark:text-zinc-100 break-all min-w-0">
+              <NuxtLink
+                v-if="label === 'Release' && group.title === 'Event'"
+                :to="`/projects/${projectId}/releases/${encodeURIComponent(value)}`"
+                class="font-mono text-orange-600 dark:text-orange-400 hover:underline"
+                >{{ value }}</NuxtLink
+              >
               <a
-                v-if="/^https?:\/\//.test(value)"
+                v-else-if="/^https?:\/\//.test(value)"
                 :href="value"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -69,6 +75,7 @@ import type { Event } from '@sentry/core';
 import { UAParser } from 'ua-parser-js';
 
 const props = defineProps<{
+  projectId: string;
   event: Event | null | undefined;
 }>();
 

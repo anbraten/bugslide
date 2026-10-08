@@ -1,7 +1,7 @@
 <template>
   <div>
-    <!-- Project header (hidden on error detail pages which have their own breadcrumb) -->
-    <div v-if="!route.params.errorId" class="mb-6">
+    <!-- Project header (hidden on detail pages which have their own breadcrumb) -->
+    <div v-if="showHeader" class="mb-6">
       <div class="flex items-center gap-2 text-base text-slate-500 dark:text-zinc-400 mb-2">
         <router-link to="/" class="hover:text-slate-700 dark:hover:text-zinc-200 transition-colors"
           >Projects</router-link
@@ -26,6 +26,16 @@
 const route = useRoute();
 
 const projectId = computed(() => route.params.projectId);
+
+// The route changes before the child page has finished loading, so toggling the header
+// directly on route params would make the old child page jump. Wait until the new page renders.
+const isDetailPage = () => !!(route.params.errorId || route.params.releaseId);
+const showHeader = ref(!isDetailPage());
+onScopeDispose(
+  useNuxtApp().hook('page:finish', () => {
+    showHeader.value = !isDetailPage();
+  }),
+);
 const { data: project } = await useFetch(() => `/api/projects/${projectId.value}`);
 
 const { data: errors } = await useFetch(() => `/api/projects/${projectId.value}/errors`, {
@@ -34,6 +44,10 @@ const { data: errors } = await useFetch(() => `/api/projects/${projectId.value}/
     limit: 1,
   },
   default: () => ({ total: 0 }),
+});
+
+const { data: releases } = await useFetch(() => `/api/projects/${projectId.value}/releases`, {
+  default: () => [],
 });
 
 const links = computed(() => [
@@ -48,6 +62,7 @@ const links = computed(() => [
     label: 'Releases',
     icon: 'i-lucide-rocket',
     to: `/projects/${projectId.value}/releases`,
+    badge: releases.value?.length ?? 0,
   },
   {
     label: 'Settings',
