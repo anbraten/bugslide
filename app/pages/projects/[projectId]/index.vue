@@ -84,9 +84,58 @@
       </div>
     </div>
 
-    <!-- Count + pagination info -->
-    <div class="flex items-center justify-between -mt-1">
-      <p class="text-sm text-slate-500 dark:text-zinc-400">
+    <!-- Count + pagination info, or bulk actions while errors are selected -->
+    <div class="flex items-center justify-between gap-3 -mt-1 min-h-8">
+      <div v-if="selected.length > 0" class="flex items-center gap-3 flex-wrap">
+        <label
+          class="flex items-center gap-3 pl-5 text-sm font-medium text-slate-700 dark:text-zinc-300 cursor-pointer"
+        >
+          <UCheckbox
+            :model-value="allSelected"
+            :indeterminate="!allSelected"
+            aria-label="Select all errors on this page"
+            @update:model-value="toggleAll"
+          />
+          {{ selected.length }} selected
+        </label>
+        <template v-if="state === 'open'">
+          <UButton
+            icon="i-lucide-check"
+            label="Resolve"
+            color="green"
+            size="sm"
+            :disabled="updating"
+            @click="changeSelectedState('resolved')"
+          />
+          <UButton
+            icon="i-lucide-eye-off"
+            label="Ignore"
+            color="gray"
+            variant="outline"
+            size="sm"
+            :disabled="updating"
+            @click="changeSelectedState('ignored')"
+          />
+        </template>
+        <UButton
+          v-else
+          icon="i-lucide-rotate-ccw"
+          label="Reopen"
+          color="gray"
+          variant="outline"
+          size="sm"
+          :disabled="updating"
+          @click="changeSelectedState('open')"
+        />
+      </div>
+      <p v-else class="flex items-center gap-3 text-sm text-slate-500 dark:text-zinc-400">
+        <UCheckbox
+          v-if="errors.length > 0"
+          :model-value="false"
+          class="ml-5"
+          aria-label="Select all errors on this page"
+          @update:model-value="toggleAll"
+        />
         {{ response?.total ?? 0 }} {{ state }} error{{ (response?.total ?? 0) !== 1 ? 's' : '' }}
         <span v-if="search">
           matching <em class="not-italic font-medium text-slate-700 dark:text-zinc-300">"{{ search }}"</em></span
@@ -146,6 +195,16 @@
         :to="`/projects/${projectId}/errors/${error.id}`"
         class="group flex items-start gap-4 px-5 py-5 hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-500"
       >
+        <!-- Selection; the label keeps clicks from navigating to the error -->
+        <label class="-m-2 p-2 shrink-0 cursor-pointer" @click.stop>
+          <UCheckbox
+            :model-value="selected.includes(error.id)"
+            :aria-label="`Select ${error.value || error.title}`"
+            class="mt-[3px]"
+            @update:model-value="toggle(error.id, $event)"
+          />
+        </label>
+
         <!-- Colored status dot -->
         <div class="mt-1.5 shrink-0">
           <span
@@ -298,7 +357,7 @@ watch([state, sort, debouncedSearch], () => {
   page.value = 1;
 });
 
-const { data: response } = await useFetch(() => `/api/projects/${projectId.value}/errors`, {
+const { data: response, refresh: refreshErrors } = await useFetch(() => `/api/projects/${projectId.value}/errors`, {
   query: computed(() => ({
     state: state.value,
     sort: sort.value,
@@ -311,6 +370,43 @@ const { data: response } = await useFetch(() => `/api/projects/${projectId.value
 });
 
 const errors = computed(() => response.value?.items ?? []);
+
+// selection only spans the current page, so drop it whenever the page content changes
+const selected = ref<number[]>([]);
+watch(errors, () => {
+  selected.value = [];
+});
+
+const allSelected = computed(() => errors.value.length > 0 && selected.value.length === errors.value.length);
+
+function toggle(id: number, checked: boolean) {
+  selected.value = checked ? [...selected.value, id] : selected.value.filter((s) => s !== id);
+}
+
+function toggleAll(checked: boolean) {
+  selected.value = checked ? errors.value.map((e) => e.id) : [];
+}
+
+const { add: addToast } = useToast();
+
+const updating = ref(false);
+async function changeSelectedState(newState: 'open' | 'resolved' | 'ignored') {
+  updating.value = true;
+  try {
+    const { updated } = await $fetch(`/api/projects/${projectId.value}/errors`, {
+      method: 'PATCH',
+      body: { ids: selected.value, state: newState },
+    });
+    await refreshErrors();
+    const titles = { resolved: 'resolved', ignored: 'ignored', open: 'reopened' };
+    const colors = { resolved: 'green' as const, ignored: 'gray' as const, open: 'orange' as const };
+    addToast({ title: `${updated} error${updated !== 1 ? 's' : ''} ${titles[newState]}`, color: colors[newState] });
+  } catch {
+    addToast({ title: 'Something went wrong', description: 'Failed to update errors.', color: 'red' });
+  } finally {
+    updating.value = false;
+  }
+}
 
 function isNew(error: { createdAt: string | Date }) {
   return Date.now() - new Date(error.createdAt).getTime() < 24 * 60 * 60 * 1000;
