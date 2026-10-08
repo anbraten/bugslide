@@ -1,24 +1,24 @@
 <template>
   <div class="flex flex-col gap-4">
+    <dl class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <HeaderStat label="Events · 30d" icon="i-lucide-activity">
+        {{ totalEvents30d.toLocaleString() }}
+      </HeaderStat>
+      <HeaderStat label="Today" icon="i-lucide-calendar-clock">
+        {{ eventsToday.toLocaleString() }}
+      </HeaderStat>
+      <HeaderStat label="Daily average" icon="i-lucide-gauge">
+        {{ dailyAverage.toLocaleString() }}
+      </HeaderStat>
+      <HeaderStat label="Peak day" icon="i-lucide-trending-up">
+        {{ peakDay?.count.toLocaleString() ?? '—' }}
+        <template v-if="peakDay" #sub>{{ formatDay(peakDay.date) }}</template>
+      </HeaderStat>
+    </dl>
+
     <!-- Error-rate chart card -->
     <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden">
-      <div class="flex items-center justify-between px-5 pt-4 pb-2">
-        <div>
-          <p class="text-xs font-medium text-slate-500 dark:text-zinc-400 uppercase tracking-wide">Error rate</p>
-          <p class="mt-0.5 text-2xl font-bold text-slate-900 dark:text-zinc-100 tabular-nums">
-            {{ totalEvents30d.toLocaleString() }}
-            <span class="text-sm font-normal text-slate-500 dark:text-zinc-400 ml-1">events in 30d</span>
-          </p>
-        </div>
-        <div class="text-right">
-          <p class="text-xs font-medium text-slate-500 dark:text-zinc-400 uppercase tracking-wide">Peak day</p>
-          <p class="mt-0.5 text-lg font-semibold text-slate-900 dark:text-zinc-100 tabular-nums">
-            {{ peakDay?.count.toLocaleString() ?? '—' }}
-            <span v-if="peakDay" class="text-sm font-normal text-slate-500 dark:text-zinc-400 ml-1">events</span>
-          </p>
-        </div>
-      </div>
-      <div class="px-5 pb-4">
+      <div class="px-5 py-4">
         <ActivityChart v-if="activity" :data="activity" />
         <div v-else class="h-16 bg-slate-100 dark:bg-zinc-800 rounded-lg animate-pulse" />
       </div>
@@ -322,6 +322,13 @@ const { data: activity } = await useFetch<{ date: string; count: number }[]>(
 );
 
 const totalEvents30d = computed(() => activity.value?.reduce((sum, d) => sum + d.count, 0) ?? 0);
+const eventsToday = computed(() => activity.value?.at(-1)?.count ?? 0);
+const dailyAverage = computed(() =>
+  activity.value?.length ? Math.round(totalEvents30d.value / activity.value.length) : 0,
+);
+function formatDay(date: string) {
+  return new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
 const peakDay = computed(() =>
   activity.value?.length ? activity.value.reduce((max, d) => (d.count > max.count ? d : max)) : null,
 );

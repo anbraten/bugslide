@@ -1,5 +1,26 @@
 <template>
-  <div>
+  <div class="flex flex-col gap-4">
+    <dl v-if="latest" class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <HeaderStat label="Releases" icon="i-lucide-rocket">
+        {{ releases.length.toLocaleString() }}
+      </HeaderStat>
+      <HeaderStat label="Latest" icon="i-lucide-tag">
+        <span class="font-mono" :title="latest.version">{{ shortRelease(latest.version) }}</span>
+        <template #sub>
+          <UTooltip :text="formatAbsolute(latest.createdAt)">
+            <span class="cursor-default">{{ timeAgo(latest.createdAt) }} ago</span>
+          </UTooltip>
+        </template>
+      </HeaderStat>
+      <HeaderStat label="Events" icon="i-lucide-activity">
+        {{ totalEvents.toLocaleString() }}
+      </HeaderStat>
+      <HeaderStat label="New errors" icon="i-lucide-flame">
+        {{ latestNewErrors.toLocaleString() }}
+        <template #sub>in latest release</template>
+      </HeaderStat>
+    </dl>
+
     <!-- Empty state -->
     <div
       v-if="releases.length === 0"
@@ -106,4 +127,8 @@ const projectId = computed(() => route.params.projectId);
 const { data: releases } = await useFetch(() => `/api/projects/${projectId.value}/releases`, {
   default: () => [],
 });
+
+const totalEvents = computed(() => releases.value.reduce((sum, r) => sum + r.events, 0));
+const latest = computed(() => releases.value[0]);
+const latestNewErrors = computed(() => latest.value?.newErrors ?? 0);
 </script>

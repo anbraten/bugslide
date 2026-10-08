@@ -1,31 +1,5 @@
 <template>
   <div>
-    <!-- Breadcrumb -->
-    <nav class="flex items-center gap-1.5 mb-5 text-sm min-w-0" aria-label="Breadcrumb">
-      <NuxtLink
-        to="/"
-        class="text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300 transition-colors"
-      >
-        Projects
-      </NuxtLink>
-      <Icon name="i-lucide-chevron-right" class="w-3.5 h-3.5 text-slate-300 dark:text-zinc-600 shrink-0" />
-      <NuxtLink
-        :to="`/projects/${projectId}`"
-        class="text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300 transition-colors truncate max-w-48"
-      >
-        {{ project?.name ?? projectId }}
-      </NuxtLink>
-      <Icon name="i-lucide-chevron-right" class="w-3.5 h-3.5 text-slate-300 dark:text-zinc-600 shrink-0" />
-      <NuxtLink
-        :to="`/projects/${projectId}/releases`"
-        class="text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300 transition-colors"
-      >
-        Releases
-      </NuxtLink>
-      <Icon name="i-lucide-chevron-right" class="w-3.5 h-3.5 text-slate-300 dark:text-zinc-600 shrink-0" />
-      <span class="text-slate-700 dark:text-zinc-300 font-medium font-mono truncate">{{ version }}</span>
-    </nav>
-
     <div
       v-if="!release"
       class="flex flex-col items-center justify-center py-20 text-center bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl"
@@ -34,37 +8,38 @@
       <h3 class="text-base font-medium text-slate-900 dark:text-zinc-100">
         {{ !fetchError || fetchError.statusCode === 404 ? 'Release not found' : 'Failed to load release' }}
       </h3>
-      <p
-        v-if="fetchError && fetchError.statusCode !== 404"
-        class="mt-1 text-sm text-slate-500 dark:text-zinc-400"
-      >
+      <p v-if="fetchError && fetchError.statusCode !== 404" class="mt-1 text-sm text-slate-500 dark:text-zinc-400">
         {{ fetchError.statusMessage || fetchError.message }}
       </p>
-      <UButton
-        label="Back to releases"
-        variant="soft"
-        size="sm"
-        class="mt-4"
-        :to="`/projects/${projectId}/releases`"
-      />
+      <UButton label="Back to releases" variant="soft" size="sm" class="mt-4" :to="`/projects/${projectId}/releases`" />
     </div>
 
     <div v-else class="flex flex-col gap-5">
-      <header
-        class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl p-4 sm:p-5 flex items-start gap-4"
-      >
-        <div class="w-10 h-10 bg-orange-50 dark:bg-orange-500/10 rounded-xl flex items-center justify-center shrink-0">
-          <Icon name="i-lucide-rocket" class="w-5 h-5 text-orange-500" />
-        </div>
-        <div class="min-w-0">
-          <h1 class="text-xl font-bold font-mono text-slate-900 dark:text-zinc-100 break-all">
-            {{ release.version }}
-          </h1>
-          <UTooltip :text="formatAbsolute(release.createdAt)">
-            <p class="mt-0.5 text-sm text-slate-500 dark:text-zinc-400 cursor-default">
-              Created {{ timeAgo(release.createdAt) }} ago
+      <header class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden">
+        <div class="p-4 sm:p-5 flex items-start gap-4">
+          <div
+            class="w-11 h-11 bg-orange-50 dark:bg-orange-500/10 rounded-xl flex items-center justify-center shrink-0"
+          >
+            <Icon name="i-lucide-rocket" class="w-5 h-5 text-orange-500" />
+          </div>
+          <div class="min-w-0">
+            <h1
+              class="mt-0.5 text-xl sm:text-2xl font-bold leading-snug font-mono text-slate-900 dark:text-zinc-100 break-all"
+            >
+              {{ release.version }}
+            </h1>
+            <p class="mt-1 text-sm text-slate-500 dark:text-zinc-400">
+              <UTooltip :text="formatAbsolute(release.createdAt)">
+                <span class="cursor-default">Created {{ timeAgo(release.createdAt) }} ago</span>
+              </UTooltip>
+              <template v-if="release.stats.firstEvent">
+                <span class="text-slate-300 dark:text-zinc-600 mx-1.5">·</span>
+                <UTooltip :text="formatAbsolute(release.stats.firstEvent)">
+                  <span class="cursor-default">first event {{ timeAgo(release.stats.firstEvent) }} ago</span>
+                </UTooltip>
+              </template>
             </p>
-          </UTooltip>
+          </div>
         </div>
       </header>
 
@@ -93,7 +68,9 @@
                       <UBadge color="orange" variant="subtle" size="xs" class="shrink-0">New</UBadge>
                     </UTooltip>
                   </div>
-                  <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500 dark:text-zinc-400">
+                  <div
+                    class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500 dark:text-zinc-400"
+                  >
                     <ErrorState :error />
                     <span class="font-mono font-semibold text-slate-600 dark:text-zinc-300 truncate max-w-64">
                       {{ error.title }}
@@ -144,50 +121,28 @@
         </div>
 
         <aside class="flex flex-col gap-5 min-w-0">
-          <ErrorSection title="Overview" icon="i-lucide-info">
-            <dl class="grid grid-cols-2 gap-4">
-              <div>
-                <dt class="text-xs font-medium text-slate-500 dark:text-zinc-400 uppercase tracking-wide">Events</dt>
-                <dd class="mt-0.5 text-2xl font-bold text-slate-900 dark:text-zinc-100 tabular-nums">
-                  {{ release.stats.events.toLocaleString() }}
-                </dd>
-              </div>
-              <div>
-                <dt class="text-xs font-medium text-slate-500 dark:text-zinc-400 uppercase tracking-wide">Errors</dt>
-                <dd class="mt-0.5 text-2xl font-bold text-slate-900 dark:text-zinc-100 tabular-nums">
-                  {{ release.stats.errors.toLocaleString() }}
-                </dd>
-              </div>
-              <div>
-                <dt class="text-xs font-medium text-slate-500 dark:text-zinc-400 uppercase tracking-wide">New errors</dt>
-                <dd class="mt-0.5 text-2xl font-bold text-slate-900 dark:text-zinc-100 tabular-nums">
-                  {{ release.stats.newErrors.toLocaleString() }}
-                </dd>
-              </div>
-              <div>
-                <dt class="text-xs font-medium text-slate-500 dark:text-zinc-400 uppercase tracking-wide">Artifacts</dt>
-                <dd class="mt-0.5 text-2xl font-bold text-slate-900 dark:text-zinc-100 tabular-nums">
-                  {{ release.files.length.toLocaleString() }}
-                </dd>
-              </div>
-              <div v-if="release.stats.firstEvent">
-                <dt class="text-xs font-medium text-slate-500 dark:text-zinc-400 uppercase tracking-wide">First event</dt>
-                <dd class="mt-0.5 text-sm font-semibold text-slate-900 dark:text-zinc-100">
-                  <UTooltip :text="formatAbsolute(release.stats.firstEvent)">
-                    <span class="cursor-default">{{ timeAgo(release.stats.firstEvent) }} ago</span>
-                  </UTooltip>
-                </dd>
-              </div>
-              <div v-if="release.stats.lastEvent">
-                <dt class="text-xs font-medium text-slate-500 dark:text-zinc-400 uppercase tracking-wide">Last event</dt>
-                <dd class="mt-0.5 text-sm font-semibold text-slate-900 dark:text-zinc-100">
-                  <UTooltip :text="formatAbsolute(release.stats.lastEvent)">
-                    <span class="cursor-default">{{ timeAgo(release.stats.lastEvent) }} ago</span>
-                  </UTooltip>
-                </dd>
-              </div>
-            </dl>
-          </ErrorSection>
+          <SidebarStats>
+            <SidebarStat label="Events" icon="i-lucide-activity">
+              {{ release.stats.events.toLocaleString() }}
+            </SidebarStat>
+            <SidebarStat label="Errors" icon="i-lucide-flame">
+              {{ release.stats.errors.toLocaleString() }}
+              <template v-if="release.stats.newErrors > 0" #sub>
+                <span class="font-medium text-orange-600 dark:text-orange-400">
+                  {{ release.stats.newErrors.toLocaleString() }} new
+                </span>
+              </template>
+            </SidebarStat>
+            <SidebarStat label="Artifacts" icon="i-lucide-file-code">
+              {{ release.files.length.toLocaleString() }}
+            </SidebarStat>
+            <SidebarStat label="Last event" icon="i-lucide-refresh-cw">
+              <UTooltip v-if="release.stats.lastEvent" :text="formatAbsolute(release.stats.lastEvent)">
+                <span class="cursor-default">{{ timeAgo(release.stats.lastEvent) }} ago</span>
+              </UTooltip>
+              <span v-else class="text-slate-400 dark:text-zinc-500">—</span>
+            </SidebarStat>
+          </SidebarStats>
 
           <ErrorSection title="Last 30 days" icon="i-lucide-chart-column">
             <template #actions>
@@ -208,7 +163,6 @@ const route = useRoute();
 
 const projectId = computed(() => route.params.projectId as string);
 const version = computed(() => route.params.releaseId as string);
-const { data: project } = await useFetch(() => `/api/projects/${projectId.value}`);
 const { data: release, error: fetchError } = await useFetch(
   () => `/api/projects/${projectId.value}/releases/${encodeURIComponent(version.value)}`,
 );

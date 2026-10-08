@@ -1,24 +1,5 @@
 <template>
   <div>
-    <!-- Breadcrumb -->
-    <nav class="flex items-center gap-1.5 mb-5 text-sm min-w-0" aria-label="Breadcrumb">
-      <NuxtLink
-        to="/"
-        class="text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300 transition-colors"
-      >
-        Projects
-      </NuxtLink>
-      <Icon name="i-lucide-chevron-right" class="w-3.5 h-3.5 text-slate-300 dark:text-zinc-600 shrink-0" />
-      <NuxtLink
-        :to="`/projects/${projectId}`"
-        class="text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300 transition-colors truncate max-w-48"
-      >
-        {{ project?.name ?? projectId }}
-      </NuxtLink>
-      <Icon name="i-lucide-chevron-right" class="w-3.5 h-3.5 text-slate-300 dark:text-zinc-600 shrink-0" />
-      <span class="text-slate-700 dark:text-zinc-300 font-medium truncate">#{{ errorId }}</span>
-    </nav>
-
     <div
       v-if="!error"
       class="flex flex-col items-center justify-center py-20 text-center bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl"
@@ -33,7 +14,7 @@
       <header class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden">
         <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-start gap-4">
           <div class="flex-1 min-w-0">
-            <div class="flex flex-wrap items-center gap-2 mb-1.5">
+            <div class="flex flex-wrap items-center gap-2 mb-2">
               <ErrorState :error />
               <UTooltip
                 v-if="error.state === 'open' && error.regressedAt"
@@ -41,20 +22,34 @@
               >
                 <UBadge color="red" variant="subtle" size="sm">Regressed</UBadge>
               </UTooltip>
-              <span class="text-sm font-mono min-w-0 truncate">
-                <span class="font-semibold text-slate-700 dark:text-zinc-300">{{ error.title }}</span>
-                <template v-if="culprit">
-                  <span class="text-slate-300 dark:text-zinc-600 mx-1.5">·</span>
-                  <span class="text-slate-500 dark:text-zinc-400">{{ culprit }}</span>
-                </template>
-              </span>
+              <span class="text-xs font-mono text-slate-400 dark:text-zinc-500">#{{ errorId }}</span>
             </div>
-            <h1 class="text-xl font-bold text-slate-900 dark:text-zinc-100 wrap-break-word line-clamp-3">
+            <h1
+              class="text-xl sm:text-2xl font-bold leading-snug text-slate-900 dark:text-zinc-100 wrap-break-word line-clamp-3"
+            >
               {{ error.value || error.title }}
             </h1>
+            <p class="mt-1.5 text-sm font-mono min-w-0 truncate">
+              <span class="font-semibold text-slate-700 dark:text-zinc-300">{{ error.title }}</span>
+              <template v-if="culprit">
+                <span class="text-slate-300 dark:text-zinc-600 mx-1.5">·</span>
+                <span class="text-slate-500 dark:text-zinc-400">{{ culprit }}</span>
+              </template>
+            </p>
           </div>
 
           <div class="flex items-center gap-2 shrink-0">
+            <UTooltip text="Copy error, stack trace and breadcrumbs as markdown">
+              <UButton
+                :icon="copied ? 'i-lucide-check' : 'i-lucide-sparkles'"
+                label="Copy for AI"
+                color="gray"
+                variant="outline"
+                size="sm"
+                :loading="copying"
+                @click="copyForAi"
+              />
+            </UTooltip>
             <template v-if="error.state === 'open'">
               <UButton icon="i-lucide-check" label="Resolve" color="green" size="sm" @click="changeState('resolved')" />
               <UButton
@@ -87,24 +82,13 @@
             error.value
           }}</pre>
         </div>
-
-        <!-- the full stats live in the sidebar, which sits below the event on small screens -->
-        <p
-          class="lg:hidden px-4 sm:px-5 py-2.5 border-t border-slate-100 dark:border-zinc-800 text-xs text-slate-500 dark:text-zinc-400 tabular-nums"
-        >
-          {{ error.events.toLocaleString() }} event{{ error.events !== 1 ? 's' : '' }}
-          <template v-if="summary">
-            · {{ summary.users.toLocaleString() }} user{{ summary.users !== 1 ? 's' : '' }}</template
-          >
-          · last seen {{ timeAgo(error.lastOccurrence) }} ago
-        </p>
       </header>
 
       <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem] items-start">
         <!-- The selected event -->
         <div class="flex flex-col gap-5 min-w-0">
           <div
-            class="sticky top-16 z-20 flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xs border border-slate-200 dark:border-zinc-800 rounded-xl"
+            class="sticky top-24 z-20 flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xs border border-slate-200 dark:border-zinc-800 rounded-xl"
           >
             <div class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 min-w-0 flex-1 text-sm">
               <span class="font-semibold text-slate-900 dark:text-zinc-100 whitespace-nowrap">
@@ -187,62 +171,43 @@
 
         <!-- Aggregates over all events -->
         <aside class="flex flex-col gap-5 min-w-0">
-          <ErrorSection title="Overview" icon="i-lucide-gauge" flush>
-            <dl
-              class="grid grid-cols-2 [&>div]:px-4 [&>div]:py-3 [&>div]:min-w-0 [&>div]:border-slate-100 dark:[&>div]:border-zinc-800 [&>div:nth-child(odd)]:border-r [&>div:nth-child(-n+2)]:border-b"
-            >
-              <div>
-                <dt class="text-xs font-medium text-slate-500 dark:text-zinc-400 uppercase tracking-wide">Events</dt>
-                <dd class="mt-0.5 text-2xl font-bold text-slate-900 dark:text-zinc-100 tabular-nums truncate">
-                  {{ error.events.toLocaleString() }}
-                </dd>
-              </div>
-              <div>
-                <dt class="text-xs font-medium text-slate-500 dark:text-zinc-400 uppercase tracking-wide">Users</dt>
-                <dd class="mt-0.5 text-2xl font-bold text-slate-900 dark:text-zinc-100 tabular-nums truncate">
-                  {{ summary ? summary.users.toLocaleString() : '—' }}
-                </dd>
-              </div>
-              <div>
-                <dt class="text-xs font-medium text-slate-500 dark:text-zinc-400 uppercase tracking-wide">
-                  First seen
-                </dt>
-                <dd class="mt-0.5 min-w-0">
-                  <UTooltip :text="formatAbsolute(error.createdAt)">
-                    <span class="text-sm font-semibold text-slate-900 dark:text-zinc-100 cursor-default">
-                      {{ timeAgo(error.createdAt) }} ago
-                    </span>
-                  </UTooltip>
-                  <NuxtLink
-                    v-if="summary?.firstRelease"
-                    :to="releaseLink(summary.firstRelease)"
-                    class="block text-xs font-mono text-slate-500 dark:text-zinc-400 hover:text-orange-600 dark:hover:text-orange-400 transition-colors truncate"
-                    :title="summary.firstRelease"
-                  >
-                    in {{ summary.firstRelease }}
-                  </NuxtLink>
-                </dd>
-              </div>
-              <div>
-                <dt class="text-xs font-medium text-slate-500 dark:text-zinc-400 uppercase tracking-wide">Last seen</dt>
-                <dd class="mt-0.5 min-w-0">
-                  <UTooltip :text="formatAbsolute(error.lastOccurrence)">
-                    <span class="text-sm font-semibold text-slate-900 dark:text-zinc-100 cursor-default">
-                      {{ timeAgo(error.lastOccurrence) }} ago
-                    </span>
-                  </UTooltip>
-                  <NuxtLink
-                    v-if="summary?.lastRelease"
-                    :to="releaseLink(summary.lastRelease)"
-                    class="block text-xs font-mono text-slate-500 dark:text-zinc-400 hover:text-orange-600 dark:hover:text-orange-400 transition-colors truncate"
-                    :title="summary.lastRelease"
-                  >
-                    in {{ summary.lastRelease }}
-                  </NuxtLink>
-                </dd>
-              </div>
-            </dl>
-          </ErrorSection>
+          <!-- how bad -->
+          <SidebarStats>
+            <SidebarStat label="Events" icon="i-lucide-activity">
+              {{ error.events.toLocaleString() }}
+            </SidebarStat>
+            <SidebarStat label="Users" icon="i-lucide-users">
+              {{ summary ? summary.users.toLocaleString() : '—' }}
+            </SidebarStat>
+            <SidebarStat label="First seen" icon="i-lucide-clock">
+              <UTooltip :text="formatAbsolute(error.createdAt)">
+                <span class="cursor-default">{{ timeAgo(error.createdAt) }} ago</span>
+              </UTooltip>
+              <template v-if="summary?.firstRelease" #sub>
+                <NuxtLink
+                  :to="releaseLink(summary.firstRelease)"
+                  class="font-mono hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
+                  :title="summary.firstRelease"
+                >
+                  in {{ shortRelease(summary.firstRelease) }}
+                </NuxtLink>
+              </template>
+            </SidebarStat>
+            <SidebarStat label="Last seen" icon="i-lucide-refresh-cw">
+              <UTooltip :text="formatAbsolute(error.lastOccurrence)">
+                <span class="cursor-default">{{ timeAgo(error.lastOccurrence) }} ago</span>
+              </UTooltip>
+              <template v-if="summary?.lastRelease" #sub>
+                <NuxtLink
+                  :to="releaseLink(summary.lastRelease)"
+                  class="font-mono hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
+                  :title="summary.lastRelease"
+                >
+                  in {{ shortRelease(summary.lastRelease) }}
+                </NuxtLink>
+              </template>
+            </SidebarStat>
+          </SidebarStats>
 
           <ErrorSection title="Last 30 days" icon="i-lucide-chart-column">
             <template #actions>
@@ -280,7 +245,6 @@ const router = useRouter();
 
 const projectId = computed(() => route.params.projectId as string);
 const errorId = computed(() => route.params.errorId as string);
-const { data: project } = await useFetch(() => `/api/projects/${projectId.value}`);
 const { data: error, refresh: refreshError } = await useFetch(
   () => `/api/projects/${projectId.value}/errors/${errorId.value}`,
 );
@@ -339,6 +303,25 @@ useSeoMeta({
 });
 
 const { add: addToast } = useToast();
+
+const copying = ref(false);
+const copied = ref(false);
+async function copyForAi() {
+  copying.value = true;
+  try {
+    const { markdown } = await $fetch<{ markdown: string }>(
+      `/api/projects/${projectId.value}/errors/${errorId.value}/events/${errorEventId.value}/markdown`,
+    );
+    await navigator.clipboard.writeText(markdown);
+    copied.value = true;
+    setTimeout(() => (copied.value = false), 2000);
+    addToast({ title: 'Copied for AI', description: 'Paste it into your assistant.', color: 'green' });
+  } catch {
+    addToast({ title: 'Something went wrong', description: 'Failed to copy the error.', color: 'red' });
+  } finally {
+    copying.value = false;
+  }
+}
 
 async function changeState(state: 'open' | 'resolved' | 'ignored') {
   try {
