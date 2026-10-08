@@ -3,18 +3,34 @@
     <header
       class="sticky top-0 z-30 border-b border-slate-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xs"
     >
-      <div class="max-w-7xl mx-auto px-4 h-16 flex items-center gap-3">
+      <div class="max-w-7xl mx-auto px-4 h-14 flex items-center gap-1.5">
         <router-link
-          class="flex items-center gap-2 font-bold text-slate-900 dark:text-zinc-100 hover:opacity-80 transition-opacity"
+          class="flex shrink-0 items-center gap-2 font-bold text-slate-900 dark:text-zinc-100 hover:opacity-80 transition-opacity"
           to="/"
+          aria-label="BugSlide"
         >
           <span class="flex items-center justify-center w-8 h-8 bg-orange-500 rounded-lg">
             <Icon name="i-lucide-flame" class="w-5 h-5 text-white" />
           </span>
-          <span class="text-lg tracking-tight">BugSlide</span>
+          <!-- inside a project the trail needs the room on small screens -->
+          <span class="text-lg tracking-tight" :class="{ 'hidden sm:inline': projectId }">BugSlide</span>
         </router-link>
 
-        <div class="ml-auto flex items-center gap-1">
+        <nav v-if="projectId" class="flex items-center gap-1.5 min-w-0 ml-1.5" aria-label="Breadcrumb">
+          <span class="shrink-0 text-lg font-light text-slate-300 dark:text-zinc-700" aria-hidden="true">/</span>
+          <ProjectSwitcher :project-id="projectId" />
+          <template v-if="detailCrumb">
+            <span class="shrink-0 text-lg font-light text-slate-300 dark:text-zinc-700" aria-hidden="true">/</span>
+            <span
+              class="truncate font-mono text-[13px] font-medium text-slate-900 dark:text-zinc-100"
+              :title="detailCrumb.title"
+            >
+              {{ detailCrumb.label }}
+            </span>
+          </template>
+        </nav>
+
+        <div class="ml-auto flex shrink-0 items-center gap-1">
           <ColorMode />
 
           <UDropdown v-if="user" :items="items" :popper="{ placement: 'bottom-start' }">
@@ -35,6 +51,10 @@
           </UDropdown>
         </div>
       </div>
+
+      <div v-if="projectId" class="max-w-7xl mx-auto px-1.5">
+        <ProjectTabs :project-id="projectId" />
+      </div>
     </header>
 
     <main class="flex-1 max-w-7xl mx-auto w-full px-4 py-8">
@@ -49,6 +69,31 @@
 
 <script setup lang="ts">
 const { user, logout } = await useAuth();
+
+const route = useRoute();
+
+// The route changes before the new page has finished loading, so following it directly would
+// show the project tabs above the old page and push it down. Switch together with the page.
+const params = shallowRef({ ...route.params });
+onScopeDispose(
+  useNuxtApp().hook('page:finish', () => {
+    params.value = { ...route.params };
+  }),
+);
+
+const projectId = computed(() => (params.value.projectId ? String(params.value.projectId) : undefined));
+
+// the tabs already say which section we're in, so detail pages only add their own id
+const detailCrumb = computed(() => {
+  if (params.value.errorId) {
+    return { label: `#${params.value.errorId}`, title: undefined };
+  }
+  if (params.value.releaseId) {
+    const release = String(params.value.releaseId);
+    return { label: shortRelease(release), title: release };
+  }
+  return undefined;
+});
 
 const items = computed(() => [
   [

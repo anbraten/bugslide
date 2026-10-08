@@ -1,30 +1,42 @@
 <template>
-  <nav class="flex items-center gap-0.5" v-bind="$attrs">
+  <!-- scrolls sideways on narrow screens, without showing a scrollbar -->
+  <nav
+    class="flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    v-bind="$attrs"
+  >
     <NuxtLink
       v-for="link in links"
       :key="link.to"
       :to="link.to"
-      :exact="link.exact"
-      class="relative flex shrink-0 items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-colors"
+      class="group relative shrink-0 pb-2 text-sm font-medium transition-colors focus-visible:outline-hidden"
       :class="
         isActive(link)
-          ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10'
-          : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800'
+          ? 'text-slate-900 dark:text-zinc-100'
+          : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100'
       "
     >
-      <Icon v-if="link.icon" :name="link.icon" class="w-4 h-4 shrink-0" />
-      <span>{{ link.label }}</span>
       <span
-        v-if="link.badge !== undefined && link.badge !== 0"
-        class="ml-0.5 inline-flex items-center justify-center min-w-[1.1rem] h-[1.1rem] px-1 text-xs font-semibold rounded-full"
-        :class="
-          isActive(link)
-            ? 'bg-orange-200 dark:bg-orange-500/30 text-orange-700 dark:text-orange-300'
-            : 'bg-slate-200 dark:bg-zinc-700 text-slate-600 dark:text-zinc-300'
-        "
+        class="flex items-center gap-2 rounded-md px-2.5 py-1.5 transition-colors group-hover:bg-slate-100 dark:group-hover:bg-zinc-800 group-focus-visible:ring-2 group-focus-visible:ring-orange-500"
       >
-        {{ link.badge }}
+        <Icon v-if="link.icon" :name="link.icon" class="w-4 h-4 shrink-0" />
+        {{ link.label }}
+        <span
+          v-if="link.badge !== undefined && link.badge !== 0"
+          class="min-w-[1.25rem] rounded px-1 text-center text-xs tabular-nums"
+          :class="
+            isActive(link)
+              ? 'bg-orange-500/15 text-orange-600 dark:text-orange-400'
+              : 'bg-slate-100 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400'
+          "
+        >
+          {{ link.badge }}
+        </span>
       </span>
+      <span
+        v-if="isActive(link)"
+        class="absolute inset-x-2.5 bottom-0 h-0.5 rounded-full bg-orange-500"
+        aria-hidden="true"
+      />
     </NuxtLink>
   </nav>
 </template>
@@ -37,6 +49,8 @@ type NavLink = {
   icon?: string;
   to: string;
   exact?: boolean;
+  // further path prefixes that belong to this link, e.g. detail pages
+  activeFor?: string[];
   badge?: number;
 };
 
@@ -47,6 +61,9 @@ defineProps<{
 const route = useRoute();
 
 function isActive(link: NavLink): boolean {
+  if (link.activeFor?.some((prefix) => route.path.startsWith(prefix))) {
+    return true;
+  }
   if (link.exact) {
     return route.path === link.to;
   }
