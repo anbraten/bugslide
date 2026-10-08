@@ -39,17 +39,16 @@
           </div>
 
           <div class="flex items-center gap-2 shrink-0">
-            <UTooltip text="Copy error, stack trace and breadcrumbs as markdown">
-              <UButton
-                :icon="copied ? 'i-lucide-check' : 'i-lucide-sparkles'"
-                label="Copy for AI"
-                color="gray"
-                variant="outline"
-                size="sm"
-                :loading="copying"
-                @click="copyForAi"
-              />
-            </UTooltip>
+            <UButton
+              :icon="copied ? 'i-lucide-check' : 'i-lucide-sparkles'"
+              label="Copy for AI"
+              title="Copy error, stack trace and breadcrumbs as markdown"
+              color="gray"
+              variant="outline"
+              size="sm"
+              :loading="copying"
+              @click="copyForAi"
+            />
             <template v-if="error.state === 'open'">
               <UButton icon="i-lucide-check" label="Resolve" color="green" size="sm" @click="changeState('resolved')" />
               <UButton
