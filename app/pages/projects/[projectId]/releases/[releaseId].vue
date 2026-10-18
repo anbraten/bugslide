@@ -40,6 +40,16 @@
               </template>
             </p>
           </div>
+          <UButton
+            class="ml-auto shrink-0"
+            icon="i-lucide-trash-2"
+            label="Delete"
+            color="red"
+            variant="soft"
+            size="sm"
+            :loading="deleting"
+            @click="deleteRelease"
+          />
         </div>
       </header>
 
@@ -166,6 +176,36 @@ const version = computed(() => route.params.releaseId as string);
 const { data: release, error: fetchError } = await useFetch(
   () => `/api/projects/${projectId.value}/releases/${encodeURIComponent(version.value)}`,
 );
+
+const toast = useToast();
+const deleting = ref(false);
+
+async function deleteRelease() {
+  if (
+    !window.confirm(
+      `Delete release "${version.value}" and its uploaded source maps? Its events and errors are kept.`,
+    )
+  ) {
+    return;
+  }
+
+  deleting.value = true;
+  try {
+    await $fetch(`/api/projects/${projectId.value}/releases/${encodeURIComponent(version.value)}`, {
+      method: 'DELETE',
+    });
+    toast.add({ title: 'Release deleted', description: `"${version.value}" has been deleted` });
+    await navigateTo(`/projects/${projectId.value}/releases`);
+  } catch (error) {
+    toast.add({
+      title: 'Failed to delete release',
+      description: error instanceof Error ? error.message : 'Please try again.',
+      color: 'red',
+    });
+  } finally {
+    deleting.value = false;
+  }
+}
 
 const events30d = computed(() => release.value?.activity.reduce((sum, d) => sum + d.count, 0) ?? 0);
 

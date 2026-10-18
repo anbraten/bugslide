@@ -24,12 +24,24 @@ export async function createOrGetRelease(event: H3Event, project: Project, relea
       version: release,
       createdAt: new Date(),
     })
+    .onConflictDoNothing()
     .returning();
 
   const created = res?.[0];
-  if (!created) {
+  if (created) {
+    return created;
+  }
+
+  // a concurrent request created it between our select and insert
+  const raced = await getFirstElement(
+    db
+      .select()
+      .from(releasesTable)
+      .where(and(eq(releasesTable.projectId, project.id), eq(releasesTable.version, release))),
+  );
+  if (!raced) {
     throw new Error('Failed to create release');
   }
 
-  return created;
+  return raced;
 }

@@ -1,4 +1,4 @@
-import { int, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { int, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
 import type { Event, Stacktrace } from '@sentry/core';
@@ -92,14 +92,18 @@ export const logsTable = sqliteTable('logs', {
   metadata: text({ mode: 'json' }),
 });
 
-export const releasesTable = sqliteTable('releases', {
-  id: int().primaryKey({ autoIncrement: true }),
-  projectId: int()
-    .references(() => projectsTable.id)
-    .notNull(),
-  version: text().notNull(),
-  createdAt: int({ mode: 'timestamp' }).notNull(),
-});
+export const releasesTable = sqliteTable(
+  'releases',
+  {
+    id: int().primaryKey({ autoIncrement: true }),
+    projectId: int()
+      .references(() => projectsTable.id)
+      .notNull(),
+    version: text().notNull(),
+    createdAt: int({ mode: 'timestamp' }).notNull(),
+  },
+  (t) => [uniqueIndex('releases_project_version_unique').on(t.projectId, t.version)],
+);
 
 export const artifactBundleFilesTable = sqliteTable('artifact_bundle_files', {
   id: int().primaryKey({ autoIncrement: true }),

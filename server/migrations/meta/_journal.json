@@ -71,6 +71,13 @@
       "when": 1791386543060,
       "tag": "0009_military_marvel_boy",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1792346852448,
+      "tag": "0010_unique_release_version",
+      "breakpoints": true
     }
   ]
 }
