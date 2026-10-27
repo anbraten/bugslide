@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
   // create release on the fly if it does not exist
   const release = await createOrGetRelease(event, project, releaseId);
 
-  const sourceMapPath = `source-maps/${project.id}/${release.id}/`;
+  const sourceMapPath = `projects/${project.id}/source_maps/${release.version}/`;
 
   // TODO: allow to upload source maps
   throw createError({

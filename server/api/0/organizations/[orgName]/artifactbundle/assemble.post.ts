@@ -12,6 +12,7 @@ import { PassThrough } from 'node:stream';
 import { buffer } from 'node:stream/consumers';
 import yauzl, { Entry } from 'yauzl';
 import { type ArtifactBundleFile, artifactBundleFilesTable } from '#server/utils/db';
+import { createOrGetRelease } from '#server/utils/releases';
 
 export default defineEventHandler(async (event) => {
   const project = await requireProjectByToken(event);
@@ -43,8 +44,9 @@ export default defineEventHandler(async (event) => {
 
   if (chunks.length > 0) {
     const db = await useDb(event);
+    const release = body.version ? await createOrGetRelease(event, project, body.version) : undefined;
     const assembler = new ArtifactBundleAssembler(s3, db);
-    await assembler.assembleArtifactBundleStream(project.id.toString(), body.checksum, chunks);
+    await assembler.assembleArtifactBundleStream(project.id.toString(), body.checksum, chunks, release?.id);
   }
 
   return {
@@ -112,7 +114,12 @@ class ArtifactBundleAssembler {
   /**
    * Assembles artifact bundle from chunks using streams
    */
-  async assembleArtifactBundleStream(projectId: string, checksum: string, chunks: string[]): Promise<void> {
+  async assembleArtifactBundleStream(
+    projectId: string,
+    checksum: string,
+    chunks: string[],
+    releaseId: number | undefined,
+  ): Promise<void> {
     if (!chunks || chunks.length === 0) {
       throw new Error('No chunks provided for assembly');
     }
@@ -175,6 +182,7 @@ class ArtifactBundleAssembler {
             const debugId = fileData.headers['debug-id'];
             artifactBundleFiles.push({
               projectId: parseInt(projectId, 10),
+              releaseId,
               filePath,
               debugId,
               type: fileData.type,
