@@ -15,11 +15,5 @@ export default defineEventHandler(async (event) => {
     return [];
   }
 
-  console.log('GET /api/0/projects/anbraten/javascript-vue/releases/1.2.3/files', {
-    release,
-    cursor,
-    checksums,
-  });
-
   return [];
 });

@@ -1,18 +1,12 @@
 import type { H3Event } from 'h3';
 import { SourceMapConsumer } from 'source-map';
-import { Readable } from 'node:stream';
-import { text } from 'node:stream/consumers';
-import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import type { S3mini } from 's3mini';
 import type { StackFrame } from '@sentry/core';
 import { and, eq, inArray } from 'drizzle-orm';
 import { artifactBundleFilesTable } from './db';
 
-function streamToString(stream: Readable): Promise<string> {
-  return text(stream);
-}
-
 export async function resolveSourceFrames(event: H3Event, projectId: string, release: string, frames: StackFrame[]) {
-  const s3Client = await getS3Client();
+  const s3Client = getS3Client();
   const db = await useDb(event);
   const sourceMapResolver = new SourceMapResolver({ s3Client, db, release, projectId });
 
@@ -41,7 +35,7 @@ export async function resolveSourceFrames(event: H3Event, projectId: string, rel
 }
 
 class SourceMapResolver {
-  s3Client: S3Client;
+  s3Client: S3mini;
   db: ReturnType<typeof useDb>;
   sourceConsumers: Map<string, SourceMapConsumer> = new Map();
   projectId: string;
@@ -53,7 +47,7 @@ class SourceMapResolver {
     projectId,
     release,
   }: {
-    s3Client: S3Client;
+    s3Client: S3mini;
     db: ReturnType<typeof useDb>;
     projectId: string;
     release: string;
@@ -140,16 +134,10 @@ class SourceMapResolver {
   }
 
   async getSourceConsumerByPath(filePath: string): Promise<SourceMapConsumer> {
-    const config = useRuntimeConfig();
-
-    const object = await this.s3Client.send(
-      new GetObjectCommand({
-        Bucket: config.s3.bucket,
-        Key: filePath,
-      }),
-    );
-
-    const mapContent = await streamToString(object.Body as Readable);
+    const mapContent = await this.s3Client.getObject(filePath);
+    if (mapContent === null) {
+      throw new Error(`Source map ${filePath} not found`);
+    }
 
     return await new SourceMapConsumer(mapContent);
   }

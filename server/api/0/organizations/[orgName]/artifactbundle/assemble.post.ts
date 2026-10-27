@@ -4,8 +4,7 @@
 // body: {"state":"created","missingChunks":[]}
 // body: {"state":"ok","detail":null,"missingChunks":[]}
 
-import { DeleteObjectCommand, GetObjectCommand, ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3';
-import { Upload } from '@aws-sdk/lib-storage';
+import type { S3mini } from 's3mini';
 import { Readable } from 'stream';
 import { createGunzip } from 'zlib';
 import { pipeline } from 'node:stream/promises';
@@ -26,26 +25,14 @@ export default defineEventHandler(async (event) => {
     dist?: string;
   }>(event);
 
-  const s3 = await getS3Client();
-  const config = useRuntimeConfig();
+  const s3 = getS3Client();
 
   const s3Prefix = `uploads/${project.id}/`;
 
-  const uploads = await s3.send(
-    new ListObjectsV2Command({
-      Bucket: config.s3.bucket,
-      Prefix: s3Prefix,
-    }),
-  );
+  const uploads = await s3.listObjects('/', s3Prefix);
 
-  const chunks = uploads.Contents?.map((i) => i.Key?.replace(s3Prefix, '') ?? '') ?? [];
+  const chunks = uploads?.map((i) => i.Key.replace(s3Prefix, '')) ?? [];
   const missingChunks = body.chunks.filter((chunk) => !chunks.includes(chunk));
-
-  console.log('POST /api/0/organizations/anbraten/artifactbundle/assemble', {
-    body,
-    chunks,
-    missingChunks,
-  });
 
   if (missingChunks.length > 0) {
     return {
@@ -56,7 +43,7 @@ export default defineEventHandler(async (event) => {
 
   if (chunks.length > 0) {
     const db = await useDb(event);
-    const assembler = new ArtifactBundleAssembler(s3, config.s3.bucket, db);
+    const assembler = new ArtifactBundleAssembler(s3, db);
     await assembler.assembleArtifactBundleStream(project.id.toString(), body.checksum, chunks);
   }
 
@@ -67,13 +54,11 @@ export default defineEventHandler(async (event) => {
 });
 
 class ArtifactBundleAssembler {
-  s3Client: S3Client;
+  s3Client: S3mini;
   db: ReturnType<typeof useDb>;
-  bucketName: string;
 
-  constructor(s3Client: S3Client, bucketName: string, db: ReturnType<typeof useDb>) {
+  constructor(s3Client: S3mini, db: ReturnType<typeof useDb>) {
     this.s3Client = s3Client;
-    this.bucketName = bucketName;
     this.db = db;
   }
 
@@ -89,19 +74,14 @@ class ArtifactBundleAssembler {
    */
   private async getChunkStream(chunkKey: string): Promise<Readable> {
     try {
-      const response = await this.s3Client.send(
-        new GetObjectCommand({
-          Bucket: this.bucketName,
-          Key: chunkKey,
-        }),
-      );
+      const response = await this.s3Client.getObjectResponse(chunkKey);
 
-      if (!response.Body) {
+      if (!response?.body) {
         throw new Error(`Chunk ${chunkKey} not found or empty`);
       }
 
       // Convert the S3 body to a Node.js readable stream
-      return Readable.from(response.Body as any);
+      return Readable.from(response.body as any);
     } catch (error) {
       throw new Error(`Failed to fetch chunk ${chunkKey}: ${(error as Error).message}`);
     }
@@ -160,6 +140,7 @@ class ArtifactBundleAssembler {
     const [_, zipBuffer] = await Promise.all([processChunks(), streamToBuffer(assemblyStream)]);
 
     const getS3Key = (fileName: string) => `projects/${projectId}/artifact_bundles/${checksum}/${fileName}`;
+    const tagging = { 'x-amz-tagging': new URLSearchParams({ projectId }).toString() } as const;
 
     const zip = await Zip.fromBuffer(zipBuffer);
     for await (const entry of zip) {
@@ -206,51 +187,21 @@ class ArtifactBundleAssembler {
 
         await this.db.insert(artifactBundleFilesTable).values(artifactBundleFiles);
 
-        const upload = new Upload({
-          client: this.s3Client,
-          params: {
-            Bucket: this.bucketName,
-            Key: getS3Key(entry.fileName),
-            Body: manifestBuffer,
-          },
-          tags: [{ Key: 'projectId', Value: projectId }],
-        });
-
-        console.log(`\tUploading ${entry.fileName} to S3 at ${getS3Key(entry.fileName)}`);
-
-        await upload.done();
+        await this.s3Client.putObject(getS3Key(entry.fileName), manifestBuffer, undefined, undefined, tagging);
       } else if (entry) {
         const stream = await zip.openReadStream(entry);
+        const data = await streamToBuffer(stream);
 
-        const upload = new Upload({
-          client: this.s3Client,
-          params: {
-            Bucket: this.bucketName,
-            Key: getS3Key(entry.fileName),
-            Body: stream,
-          },
-          tags: [{ Key: 'projectId', Value: projectId }],
-        });
-
-        console.log(`\tUploading ${entry.fileName} to S3 at ${getS3Key(entry.fileName)}`);
-
-        await upload.done();
+        await this.s3Client.putObject(getS3Key(entry.fileName), data, undefined, undefined, tagging);
       }
     }
 
     await Promise.all(chunks.map((chunk) => this.deleteS3File(`uploads/${projectId}/${chunk}`)));
-
-    console.log(`\tDeleted original chunks after assembly: ${chunks.join(', ')}`);
   }
 
   async deleteS3File(key: string) {
     try {
-      await this.s3Client.send(
-        new DeleteObjectCommand({
-          Bucket: this.bucketName,
-          Key: key,
-        }),
-      );
+      await this.s3Client.deleteObject(key);
     } catch (error) {
       console.error(`Failed to delete original chunk ${key}:`, error);
     }

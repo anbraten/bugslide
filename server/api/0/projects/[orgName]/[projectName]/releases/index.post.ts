@@ -7,10 +7,6 @@ export default defineEventHandler(async (event) => {
     dateStarted: string;
   }>(event);
 
-  console.log('POST /api/0/projects/anbraten/javascript-vue/releases', {
-    body,
-  });
-
   // TODO: return proper response
   return {
     version: body.version ?? '1.2.3',

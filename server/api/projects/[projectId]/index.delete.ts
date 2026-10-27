@@ -20,9 +20,9 @@ export default defineEventHandler(async (event) => {
   try {
     const config = useRuntimeConfig(event);
     if (config.s3.endpoint && config.s3.accessKey && config.s3.secretKey) {
-      const s3Client = await getS3Client();
-      await deleteS3Prefix(s3Client, config.s3.bucket, `projects/${project.id}/`);
-      await deleteS3Prefix(s3Client, config.s3.bucket, `uploads/${project.id}/`);
+      const s3Client = getS3Client();
+      await deleteS3Prefix(s3Client, `projects/${project.id}/`);
+      await deleteS3Prefix(s3Client, `uploads/${project.id}/`);
     }
   } catch (error) {
     console.error(`Failed to clean up S3 files for deleted project ${project.id}:`, error);

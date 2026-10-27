@@ -33,8 +33,8 @@ export default defineEventHandler(async (event) => {
   try {
     const config = useRuntimeConfig(event);
     if (config.s3.endpoint && config.s3.accessKey && config.s3.secretKey) {
-      const s3Client = await getS3Client();
-      await deleteS3Prefix(s3Client, config.s3.bucket, `source-maps/${project.id}/${release.id}/`);
+      const s3Client = getS3Client();
+      await deleteS3Prefix(s3Client, `source-maps/${project.id}/${release.id}/`);
     }
   } catch (error) {
     console.error(`Failed to clean up S3 files for deleted release ${release.id}:`, error);

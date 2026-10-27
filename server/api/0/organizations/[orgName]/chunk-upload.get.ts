@@ -6,10 +6,6 @@ export default defineEventHandler(async (event) => {
   const host = config.public.host;
   const url = `${host}/api/0/organizations/${orgName}/chunk-upload/`;
 
-  console.log('GET /api/0/organizations/anbraten/chunk-upload', {
-    orgName,
-  });
-
   return {
     url,
     chunkSize: 8388608,
